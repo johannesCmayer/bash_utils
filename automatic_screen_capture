@@ -1,12 +1,14 @@
 #!/bin/bash
 
 INTERVAL=$((60*5))
+SAVE_LOC=~/Pictures/ScreenCaptures
 
+[[ ! -d $SAVE_LOC ]] && mkdir $SAVE_LOC && echo "$SAVE_LOC does not exist -> creating it"
 
 while [[ true ]]; do
     echo Taking Screenshot - $(date)
     shutter --disable_systray -p Autocapture -c -e -f -n \
-      -o /home/johannes/Pictures/ScreenCaptures/%Y%m%d_%T_Interval-$INTERVAL'_AutomaticScreenCapture' \
+      -o ~/Pictures/ScreenCaptures/%Y%m%d_%T_Interval-$INTERVAL'_AutomaticScreenCapture' \
       > /dev/null 2>&1
     for (( i=0; i<=$INTERVAL; i++ )); do
         echo -ne "\r\033[K"'Next Screenshot in '$((INTERVAL - i))'s'
