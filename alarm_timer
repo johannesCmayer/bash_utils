@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# This is a simple terminal alarm clock
+
+if [ -z $1 ]; then
+    echo 'First parameter gives wait time in minutes'
+    exit 0
+fi
+
+MIN=$1
+SEC=$((MIN * 60))
+
+echo 'Start Time: '$(date)
+for (( i=0; i<=$SEC; i++ )); do
+    echo -ne "\r\033[K"$((MIN - (59 + i) / 60))'m '$(((SEC - i) % 60))'s to activation'
+    sleep 1
+done
+mplayer ~/Music/*
+exit 0

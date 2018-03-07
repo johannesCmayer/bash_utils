@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# This script startsup the poly-clock and logs it's usage.
+
+LOC="$(dirname "$(realpath "$0")")"
+EXEC_COMMAND="$LOC/shutdown_and*"
+MYDIR="/home/johannes/logs"
+LOGNAME="pclock_call_log"
+LF=$MYDIR/$LOGNAME
+SUS_DUR=$((31*60))
+DOLOG=true
+
+usage() { echo "usage:" && grep "[[:space:]].)\ #" $0 | \
+            sed 's/[[:space:]]|[[:space:]]\*//' | \
+            sed 's/#//' | sed -r 's/([a-z])\)/-\1/'; exit 0; }
+
+while getopts "sm:t:l" option; do
+    case $option in
+        s) # Set this option to suspend
+            SUSPEND=true
+            ;;
+        m) # A message writen to log file
+            LOGMSG=${OPTARG}
+            ;;
+        t) # Time to suspend in minutes
+            SUS_DUR=$((${OPTARG} * 60))
+            ;;
+        l) # Don't log use
+            DOLOG=false
+            ;;
+        h | *) # Display help
+            usage
+            ;;
+    esac
+done
+[[ $OPTIND -eq 1 ]] && usage
+[[ -z $LOGMSG ]] && echo "Please leave a message with -m about the use case." && exit 1
+
+get_formated_time() 
+{
+    local dur=$1
+    echo "$((dur / 60))m $((dur % 60))s"; 
+}
+
+log()
+{
+    [[ ! DOLOG ]] && echo 'DONT LOG' && return 0
+    local start_date=$1
+    local start_time=$2
+
+    local end_time=`date '+%s'`
+    local dur=$((START_TIME - end_time))
+    local msg="$start_date"
+    [[ ! -z $SUSPEND ]] && msg="$msg --- `get_formated_time $dur` exec time" \
+                        || msg="$msg --- NOT SUSPENDED"
+    [[ ! -z $LOGMSG ]] && msg="$msg --- Log msg: $LOGMSG"
+    echo $msg
+    echo $msg | cat - $LF  > $MYDIR/tmp && mv $MYDIR/tmp $LF
+    exit 0
+}
+
+START_DATE=`date`
+START_TIME=`date '+%s'`
+
+log_c() { log "$START_DATE" $START_TIME; }
+
+trap log_c SIGINT
+[[ ! -z $SUSPEND ]] && echo $(sudo $EXEC_COMMAND $SUS_DUR)
+log_c
+echo $msg
