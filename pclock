@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# This script startsup the poly-clock and logs it's usage.
+# This script startsup the shutdown_and_restart and logs it's usage.
 
 LOC="$(dirname "$(realpath "$0")")"
 EXEC_COMMAND="$LOC/shutdown_and*"
-MYDIR="/home/johannes/logs"
+LOGDIR=~/logs
 LOGNAME="pclock_call_log"
-LF=$MYDIR/$LOGNAME
+LF=$LOGDIR/$LOGNAME
 SUS_DUR=$((31*60))
 DOLOG=true
 
@@ -29,12 +29,15 @@ while getopts "sm:t:l" option; do
             DOLOG=false
             ;;
         h | *) # Display help
+            echo "logfile: $LF"
+            echo -e "default suspend time: $SUS_DUR s \n"
             usage
             ;;
     esac
 done
 [[ $OPTIND -eq 1 ]] && usage
 [[ -z $LOGMSG ]] && echo "Please leave a message with -m about the use case." && exit 1
+[[ ! -d "$LOGDIR" ]] && mkdir "$LOGDIR" && echo "$LOGDIR does not exist -> creating it"
 
 get_formated_time() 
 {
@@ -54,8 +57,9 @@ log()
     [[ ! -z $SUSPEND ]] && msg="$msg --- `get_formated_time $dur` exec time" \
                         || msg="$msg --- NOT SUSPENDED"
     [[ ! -z $LOGMSG ]] && msg="$msg --- Log msg: $LOGMSG"
+    [[ ! -e $LF ]] && touch $LF && echo "$LF does not exist -> creating it"
+    echo $msg | cat - $LF  > $LOGDIR/tmp && mv $LOGDIR/tmp $LF
     echo $msg
-    echo $msg | cat - $LF  > $MYDIR/tmp && mv $MYDIR/tmp $LF
     exit 0
 }
 

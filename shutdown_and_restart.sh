@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script shutsdown the Computer for a certain time period, then reboots and plays music with a crescendo effect.
+
 MAXVOL=60 # max is64
 MINVOL=20
 INV_VOL_INCEASE_RATE=1
