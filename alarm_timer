@@ -13,6 +13,7 @@ MINUTES=$1
 
 START_TIME=$(date '+%s')o
 END_TIME=$(date '+%s' -d "+ $MINUTES minutes")
+echo "End time $(date -d "+ $MINUTES minutes")"
 
 while true; do
     sec_remaining=$((END_TIME - $(date '+%s')))
