@@ -37,7 +37,9 @@ while getopts "sm:t:l" option; do
 done
 [[ $OPTIND -eq 1 ]] && usage
 [[ -z $LOGMSG ]] && echo "Please leave a message with -m about the use case." && exit 1
+
 [[ ! -d "$LOGDIR" ]] && mkdir "$LOGDIR" && echo "$LOGDIR does not exist -> creating it"
+[[ ! -e $LF ]] && touch $LF && echo "$LF does not exist -> creating it"
 
 get_formated_time() 
 {
@@ -47,19 +49,24 @@ get_formated_time()
 
 log()
 {
-    [[ ! DOLOG ]] && echo 'DONT LOG' && return 0
     local start_date=$1
     local start_time=$2
 
     local end_time=`date '+%s'`
-    local dur=$((START_TIME - end_time))
-    local msg="$start_date"
-    [[ ! -z $SUSPEND ]] && msg="$msg --- `get_formated_time $dur` exec time" \
-                        || msg="$msg --- NOT SUSPENDED"
-    [[ ! -z $LOGMSG ]] && msg="$msg --- Log msg: $LOGMSG"
-    [[ ! -e $LF ]] && touch $LF && echo "$LF does not exist -> creating it"
-    echo $msg | cat - $LF  > $LOGDIR/tmp && mv $LOGDIR/tmp $LF
-    echo $msg
+    local dur=$((end_time - START_TIME))
+
+    local msg="$start_date \n"
+    
+    msg="$msg""Target suspend time $(get_formated_time $SUS_DUR)\n"
+    [[ ! -z $SUSPEND ]] && msg="$msg""$(get_formated_time $dur) exec time" && [[ $dur -lt $SUS_DUR ]] && msg="$msg --- ABORTED BEVORE WAKEUP"
+    [[ -z $SUSPEND ]] && msg="$msg""NOT SUSPENDED"
+    msg="$msg \n"
+    [[ ! -z $LOGMSG ]] && msg="$msg""Log msg: $LOGMSG \n"
+    
+    msg="$msg""------------------------------------------------------\n "
+    echo -en $msg
+    [[ $DOLOG == false ]] && echo 'DONT LOG TO FILE' && exit 0
+    echo -en $msg | cat - $LF  > $LOGDIR/tmp && mv $LOGDIR/tmp $LF
     exit 0
 }
 
