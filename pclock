@@ -55,7 +55,7 @@ log()
     local end_time=`date '+%s'`
     local dur=$((end_time - START_TIME))
 
-    local msg="$start_date \n"
+    local msg="$start_date <- Start \n$(date) <- End \n"
     
     msg="$msg""Target suspend time $(get_formated_time $SUS_DUR)\n"
     [[ ! -z $SUSPEND ]] && msg="$msg""$(get_formated_time $dur) exec time" && [[ $dur -lt $SUS_DUR ]] && msg="$msg --- ABORTED BEVORE WAKEUP"
@@ -66,7 +66,7 @@ log()
     msg="$msg""------------------------------------------------------\n "
     echo -en $msg
     [[ $DOLOG == false ]] && echo 'DONT LOG TO FILE' && exit 0
-    echo -en $msg | cat - $LF  > $LOGDIR/tmp && mv $LOGDIR/tmp $LF
+    echo -en $msg >> $LF
     exit 0
 }
 
