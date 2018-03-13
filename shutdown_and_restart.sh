@@ -6,7 +6,9 @@ MAXVOL=60 # max is64
 MINVOL=20
 INV_VOL_INCEASE_RATE=1
 SUSPEND=true
-MUSIC_PATH=~/Music/*
+MUSIC_PATH=~/Music
+
+MY_DIR=$(dirname $0)
 
 validate()
 {
@@ -45,7 +47,8 @@ prep_and_shutdown()
 
     sleep 1
     if $SUSPEND; then
-        systemctl suspend
+        #systemctl suspend
+        echo nosus
     fi
     sleep 1
 }
@@ -54,7 +57,9 @@ play_music()
 {
     inital_volume=$(master_volume)
     master_volume 0
-    mplayer -shuffle $MUSIC_PATH >/dev/null 2>&1 &
+    echo $MY_DIR
+    echo "$MY_DIR/recursive_music_play $MUSIC_PATH"
+    $MY_DIR/recursive_music_play $MUSIC_PATH >/dev/null 2>&1 &
     MPID=$!
 
     echo "Starting master volume crescendo"

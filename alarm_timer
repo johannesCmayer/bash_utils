@@ -2,7 +2,9 @@
 
 # This is a simple terminal alarm clock
 
-MUSIC_DIR=~/Music/*
+MUSIC_DIR=~/Music/* ~/Music/*/*
+
+MY_DIR=$(dirname $0)
 
 if [ -z $1 ]; then
     echo 'First parameter needs to give wait time in minutes'
@@ -22,5 +24,5 @@ while true; do
     sleep 1
 done
 
-mplayer -shuffle $MUSIC_DIR
+$MY_DIR/recursive_music_play $MUSIC_DIR
 exit 0
