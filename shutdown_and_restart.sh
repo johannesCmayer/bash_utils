@@ -47,7 +47,7 @@ prep_and_shutdown()
 
     sleep 1
     if $SUSPEND; then
-        #systemctl suspend
+        systemctl suspend
         echo "Suspend initialized"
     fi
     sleep 1
