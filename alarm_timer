@@ -2,7 +2,7 @@
 
 # This is a simple terminal alarm clock
 
-MUSIC_DIR=~/Music/* ~/Music/*/*
+MUSIC_DIR=~/Music/*
 
 MY_DIR=$(dirname $0)
 

@@ -48,7 +48,7 @@ prep_and_shutdown()
     sleep 1
     if $SUSPEND; then
         #systemctl suspend
-        echo nosus
+        echo "Suspend initialized"
     fi
     sleep 1
 }
@@ -61,6 +61,8 @@ play_music()
     echo "$MY_DIR/recursive_music_play $MUSIC_PATH"
     $MY_DIR/recursive_music_play $MUSIC_PATH >/dev/null 2>&1 &
     MPID=$!
+    echo $MPID
+
 
     echo "Starting master volume crescendo"
     for ((i=$MINVOL; i<=$MAXVOL; i++)); do
@@ -80,6 +82,7 @@ cleanup_exit()
     if [ -n "$(ps -p $MPID -o pid=)" ]; then
         kill $MPID 
     fi
+#    sudo killall mplayer
     sleep 0.5
     master_volume $inital_volume
     exit 0
