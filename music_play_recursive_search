@@ -1,0 +1,15 @@
+#!/bin/bash
+
+MUSIC_DIR=$1
+
+cleanup()
+{
+    sudo killall mplayer
+    exit 0
+}
+
+trap cleanup SIGINT
+
+for X in $(find "$MUSIC_DIR" $MUSIC_DIR/* -type d | shuf):; do 
+    mplayer -shuffle $X/*
+done
