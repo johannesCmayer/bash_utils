@@ -1,0 +1,67 @@
+#!/bin/bash
+help() {
+	echo "This script merges pds that are potentially passwordless encrypted and provides functionality to remove the fist page in selected pdf files."
+	echo ""
+	echo "Usage:"
+	echo "  $0 DIR_WITH_PDFs"
+	echo ""
+	echo "  1. Put all the pdfs to be merged in the same directory as this script."
+	echo "  2. Name them so that the alphanumerical ordering is the desired ordering of the final pdf."
+	echo "  3. Add \"RMF_\" (without quotes) to the front of the file name to remove the first page of the pdf in the final output."
+	echo "  4. Run the script."
+}
+[[ $1 == "-h" || $1 == "--help" || $1 == "" ]] && help && exit 1
+
+cd $1
+start_path=$(pwd)
+ok='---OK'
+cleanup () {
+	cd $start_path
+	rm -rd temp
+}
+interrupt () {
+	cleanup
+	echo ""
+	exit 0
+}
+
+trap interrupt INT
+
+[ -d temp ] && echo "exiting because directory temp exists already" && exit 1
+mkdir temp
+echo -n "decrypting pdfs"
+for f in *.pdf; do
+	[[ $f == final.pdf ]] && echo -n " skipping $f" && continue
+	qpdf --decrypt $f temp/$f
+done
+echo $ok
+
+cd temp
+echo -n "removing first page from RMF_ tagged pdfs"
+for f in *.pdf; do
+	if [[ $f == "RMF_"* ]]; then
+		pdfseparate $f %d
+		[[ ??? != "???" ]] && (echo "script cant handle pdfs that have more than 99 pages"; cleanup; exit 1)
+		for f2 in ?; do
+			if [[ $f2 != "?" ]]; then
+				mv $f2 0$f2
+			fi
+		done
+		rm 01
+		rm $f
+		pdfunite ?? $f
+		rm ??
+	fi
+done
+echo $ok
+
+echo -n "processing names"
+rename -e "s/RMF_//" *.pdf
+echo $ok
+
+echo -n "generating final pdf"
+pdfunite *.pdf $start_path/final.pdf
+echo $ok
+cleanup
+
+echo "Done"

@@ -1,0 +1,24 @@
+#!/bin/bash
+[[ $1 == '' ]] && echo Usage: $(basename $0) ip port mac-address && exit 0
+
+ip=$1
+port=$2
+mac=$3
+sends=5
+
+o_IFS=$IFS
+IFS=":"
+for e in $mac; do
+  b_mac=$b_mac$(echo -n -e \\x$e)
+done
+IFS=$o_IFS
+
+_255=$(echo -n -e \\xff)
+m=$(printf "$_255%.0s" {1..6})$(printf "$b_mac%.0s" {1..16})
+
+echo -n "sending $sends magic pakets:"
+for i in $(seq 1 $sends); do
+  echo -n $m | nc -w 3 -N -4u $ip $port
+  echo -n ' *'
+done
+echo

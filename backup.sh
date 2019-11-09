@@ -41,4 +41,4 @@ fi
 
 printf "> starting transfer \n\n"
 
-rsync --archive --human-readable --delete --info=progress2 ~ $backupDir
+rsync --archive --human-readable --delete --info=progress2 ~ $backupDir && printf "\n Backup complete\n"
