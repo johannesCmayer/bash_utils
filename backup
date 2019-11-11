@@ -1,0 +1,54 @@
+#!/bin/bash
+
+printhelp()
+{
+  echo -e "Usage:\n\tbackup dir\tcreate backup in dir\n\tbackup log\tshow the log"
+}
+
+log_file="/var/log/backup.log"
+
+if [ "$#" -eq 0 ]
+then
+  printhelp
+  exit 1
+fi
+
+[[ $1 == 'log' ]] && (cat $log_file; exit 0)
+[[ ! -f $log_file ]] && echo creating log in $log_file && \
+	sudo touch $log_file && sudo chown $(basename ~):$(basename ~) $log_file
+
+date=$(date -Is)
+createdNewDir=""
+
+backupDirectoryRoot=$1
+backupDirNoWild=$backupDirectoryRoot/home_and_data_backup
+backupDir=$backupDirNoWild*
+newBackupDir=$backupDirNoWild"_"$date
+
+echo "> Targeted backup dir is $newBackupDir"
+if [ ! -d $backupDir ]; then
+  echo "> $backupDirNoWild does not exist, creating"
+  mkdir $newBackupDir || exit 0
+  createdNewDir=1
+fi
+
+dirs=( $backupDir )
+if [ ! -z ${dirs[1]} ]; then
+  echo "> there are multiple backup directories in the drive, only one is allowed"
+  echo "  at least 2 directories exist ${dirs[0]} and ${dirs[1]}"
+  exit 1
+fi
+echo "> In $backupDirectoryRoot found $backupDir as backupdir to use"
+
+if [ -z $createdNewDir ]; then
+  echo "> renaming $backupDir to $newBackupDir"
+  mv $backupDir $newBackupDir
+fi
+
+printf "> starting transfer \n\n"
+
+echo "START: $date; to $1" >> $log_file
+rsync --archive --human-readable --delete --info=progress2 ~ $backupDir && printf "\n Backup complete\n"
+echo "END: completed at $(date -Is)" >> $log_file
+
+exit 0

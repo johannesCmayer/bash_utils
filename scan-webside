@@ -1,0 +1,9 @@
+#!/bin/bash
+logdir=/var/log
+cd $logdir
+[[ ! -d .scan-website ]] && mkdir .scan-website
+cd .scan-website
+echo $(pwd)
+[[ -d current ]] && mv current previous
+wget -P current https://www.maastrichthousing.com/Search_results.html?show=searchprofile
+[[ -d previous ]] && diff -q previous current
