@@ -21,8 +21,9 @@ dir=$1
 dim=$2
 
 cd dir
-echo Converting ptts to pdfs
+echo Converting ptts to pdfs if existant
 libreoffice --headless --invisible --convert-to pdf *ppt*
+
 
 echo generating print ready pdfs
 mkdir print_ready
@@ -35,6 +36,6 @@ done
 
 echo moveing ppt and pptx files to seperate directory
 mkdir ppt
-$mv $(find *.ppt* -type f -maxdepth 1) ppt
+$mv $(find *.ppt* -maxdepth 1 -type f) ppt
 
 exit 0
