@@ -15,7 +15,7 @@ fi
 
 [[ $1 == 'log' ]] && (cat $log_file; exit 0)
 [[ ! -f $log_file ]] && echo creating log in $log_file && \
-	sudo touch $log_file && sudo chown $(basename ~):$(basename ~) $log_file
+       	sudo touch $log_file 
 
 date=$(date -Is)
 createdNewDir=""
