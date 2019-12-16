@@ -2,14 +2,20 @@
 
 printhelp()
 {
-  echo "Usage: backup backupDriveRootDirectory"
+  echo -e "Usage:\n\tbackup dir\tcreate backup in dir\n\tbackup log\tshow the log"
 }
+
+log_file="/var/log/backup.log"
 
 if [ "$#" -eq 0 ]
 then
   printhelp
   exit 1
 fi
+
+[[ $1 == 'log' ]] && (cat $log_file; exit 0)
+[[ ! -f $log_file ]] && echo creating log in $log_file && \
+	sudo touch $log_file && sudo chown $(basename ~):$(basename ~) $log_file
 
 date=$(date -Is)
 createdNewDir=""
@@ -41,4 +47,8 @@ fi
 
 printf "> starting transfer \n\n"
 
+echo "START: $date; to $1" >> $log_file
 rsync --archive --human-readable --delete --info=progress2 ~ $backupDir && printf "\n Backup complete\n"
+echo "END: completed at $(date -Is)" >> $log_file
+
+exit 0

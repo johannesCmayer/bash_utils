@@ -1,0 +1,41 @@
+#!/bin/bash
+
+debug=''
+
+if [[ -z "$1" || -z "$2" ]]
+then
+  echo Usage: $(basename $0) file_directory dimentions
+  echo The file_directory should contain all the files that should be prepared for printing.
+  echo Dimentions should be of the form AxB where A and B are the number of pages to put on one page.
+  exit 0
+fi
+
+if debug; then
+  echo set dir $1
+  echo set dim $2
+  echo $(pwd)
+  exit 1
+fi
+
+dir=$1
+dim=$2
+
+cd dir
+echo Converting ptts to pdfs if existant
+libreoffice --headless --invisible --convert-to pdf *ppt*
+
+
+echo generating print ready pdfs
+mkdir print_ready
+for f in *.pdf; do
+  if [[ -f $f ]]; then
+    echo ---------$f
+    pdfnup --nup $dim --outfile "print_ready/$f" "$f"
+  fi
+done
+
+echo moveing ppt and pptx files to seperate directory
+mkdir ppt
+$mv $(find *.ppt* -maxdepth 1 -type f) ppt
+
+exit 0
