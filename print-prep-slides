@@ -36,6 +36,8 @@ done
 
 echo moveing ppt and pptx files to seperate directory
 mkdir ppt
-$mv $(find *.ppt* -maxdepth 1 -type f) ppt
+for f in $(find *.ppt* -maxdepth 1 -type f); do
+  mv $f ppt/$f
+done
 
 exit 0

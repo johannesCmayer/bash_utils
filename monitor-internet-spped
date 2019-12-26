@@ -1,0 +1,16 @@
+#!/bin/bash
+i=1
+while true; do
+  sleep 1
+  echo test $i running
+  say test $i running
+  i=$(($i+1))
+  cat <(speedtest) |
+  grep -E 'Latency|Download|Upload' |
+  cut -c 1-22 |
+  while read line; do
+    echo $line
+    say $line
+  done
+  echo ---
+done
