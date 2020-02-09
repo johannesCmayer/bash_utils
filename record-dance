@@ -1,0 +1,16 @@
+#!/bin/bash
+
+record_dir=~/data/images_and_videos/produce/dance
+video_name="$(date '+%Y-%m-%d_%H-%M-%S')"
+extension=".mp4"
+file_name=$video_name$extension
+audio_delay=0.28
+
+cd $record_dir || exit 1
+
+ffmpeg -f v4l2 -framerate 60 -video_size 800x600 -c:v mjpeg -re -i /dev/video0 -f alsa -i default $file_name
+
+# Post processing
+ffmpeg -i $file_name -itsoffset $audio_delay -i $file_name -map 0:v -map 1:a -c copy "$video_name"_offset.mp4
+
+exit 0

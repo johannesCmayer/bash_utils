@@ -1,0 +1,35 @@
+#!/bin/bash
+name=$1
+command=$2
+filePath=$HOME/.local/share/applications/"$name".desktop
+
+if [[ $1 == "-h" || $1 == '' ]]; then 
+  echo "usage $(basename $0) [-h, -l] entryName entryCommand"
+  echo "-h := print help; -l := list gnome desktop files"
+  exit 0
+fi
+if [[ $1 == "-l" ]]; then 
+  ls $HOME/.local/share/applications
+  exit 0
+fi
+if [[ $1 == "-r" ]]; then
+  cmdToRemove=$2
+  rm "$HOME/.local/share/applications/$cmdToRemove.desktop" || exit 1
+  echo "$2 removed from menu"
+  exit 0
+fi
+
+if [[ -f $filePath ]]; then 
+  >&2 echo "ERROR - desktop entry by that name exsists"
+  exit 1
+fi
+
+cat > "$filePath" << EOM
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$name
+Exec=$command
+EOM
+
+exit 0
