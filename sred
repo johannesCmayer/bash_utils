@@ -1,0 +1,10 @@
+#!/bin/bash
+
+stateFile=$(dirname ${BASH_SOURCE[0]})'/.sred_state'
+
+if [[ ! -f $stateFile ]]
+    then redshift -r -o -t 2000:2000 && touch $stateFile
+    else redshift -x && rm $stateFile
+fi
+
+exit 0
