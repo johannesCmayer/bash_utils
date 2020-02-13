@@ -1,0 +1,14 @@
+#!/bin/bash
+source ~/anaconda3/etc/profile.d/conda.sh
+conda activate deepspeech
+
+if [[ -v $1 ]]; then
+    fname=~/Tailor/deepspeech-0.6.1-models/audio/$(date -Is).wav
+    ffmpeg -f alsa -ar 16000 -i default $fname
+else
+    fname=$1
+fi
+
+deepspeech --model ~/Tailor/deepspeech-0.6.1-models/deepspeech-0.6.1-models/output_graph.pbmm --audio $fname
+
+exit 0
