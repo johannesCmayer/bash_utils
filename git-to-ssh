@@ -1,0 +1,51 @@
+#/bin/bash
+#-- Script to automate https://help.github.com/articles/why-is-git-always-asking-for-my-password
+
+# function by is from m14t/fix_github_https_repo.sh (https://gist.github.com/m14t/3056747)
+set_url() {
+  REPO_URL=`git remote -v | grep -m1 '^origin' | sed -Ene's#.*(https://[^[:space:]]*).*#\1#p'`
+  if [ -z "$REPO_URL" ]; then
+    echo "-- ERROR:  Could not identify Repo url."
+    echo "   It is possible this repo is already using SSH instead of HTTPS."
+    return
+  fi
+
+  USER=`echo $REPO_URL | sed -Ene's#https://github.com/([^/]*)/(.*).git#\1#p'`
+  if [ -z "$USER" ]; then
+    echo "-- ERROR:  Could not identify User."
+    return
+  fi
+
+  REPO=`echo $REPO_URL | sed -Ene's#https://github.com/([^/]*)/(.*).git#\2#p'`
+  if [ -z "$REPO" ]; then
+    echo "-- ERROR:  Could not identify Repo."
+    return
+  fi
+
+  NEW_URL="git@github.com:$USER/$REPO.git"
+  echo "Changing repo url from "
+  echo "  '$REPO_URL'"
+  echo "      to "
+  echo "  '$NEW_URL'"
+  echo ""
+
+  CHANGE_CMD="git remote set-url origin $NEW_URL"
+  `$CHANGE_CMD`
+
+  echo "Success"
+}
+
+ROOT_SEARCH=$1
+echo $ROOT_SEARCH
+if [[ ! -z "$ROOT_SEARCH" ]]; then
+  read -p "We will recursively search for repositories in $ROOT_SEARCH and set the url to be ssh! proceed? y/n" -n 1 -r
+  [[ $REPLY =~ ^[Yy]$ ]] || exit 0
+  for f in $(find ~/data/ -name .git -type d); do
+    cd "$f"
+    set_url
+  done
+else
+  set_url
+fi
+
+exit 0
