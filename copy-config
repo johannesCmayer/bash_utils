@@ -1,0 +1,16 @@
+#!/bin/bash
+
+interupt() {
+    exit 0
+}
+
+trap interupt INT
+
+device=$1
+
+for f in /etc/hosts /etc/cron* /var/spool/cron; do
+    echo "copying $f"
+    sudo rsync -a $f johannes@$(getip $device):$f
+done
+
+exit 0

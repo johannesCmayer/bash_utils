@@ -1,0 +1,22 @@
+#!/bin/bash
+
+usage() {
+  echo usage:
+  echo "  $(basename $0) time_interval alarm_after"
+  echo "  all arguments are in seconds"
+}
+
+interupt() {
+    kill $(jobs -p)
+}
+
+trap interupt INT
+
+time_interval=$1
+alarm_after=$2
+
+[[ -z $time_interval || -z $alarm_after ]] && usage && exit 0
+
+nohup rand-sound $time_interval &
+sleep $alarm_after
+rand-sound 1

@@ -1,0 +1,27 @@
+#!/bin/bash
+rnd_sound_dir=/mnt/data_main/audio/cretating/random_sounds_LeshySF
+
+usage(){
+    echo "usage:"
+    echo "$(basename $0) sleepInterval"
+}
+
+ctrl_c() {
+    exit 0
+}
+
+trap ctrl_c INT
+
+sleep_interval=$1
+
+[[ -z $sleep_interval ]] && usage && exit 0
+
+cd $rnd_sound_dir
+while true; do
+    files=$(ls | sort -R)
+    for f in $files; do
+        echo play "$f"
+        mplayer "$f"
+        sleep "$sleep_interval"
+    done
+done

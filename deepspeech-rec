@@ -2,13 +2,33 @@
 source ~/anaconda3/etc/profile.d/conda.sh
 conda activate deepspeech
 
-if [[ -v $1 ]]; then
-    fname=~/Tailor/deepspeech-0.6.1-models/audio/$(date -Is).wav
-    ffmpeg -f alsa -ar 16000 -i default $fname
+Tailor_paths="$HOME/TAIlor $HOME/data/projects/misc/Tailor"
+for p in $Tailor_paths; do
+    if [[ -d "$p" ]]; then
+        Tailor_path="$p"
+        break
+    fi
+done
+
+if [[ -z "$Tailor_path" ]]; then
+    echo $Tailor_path
+    echo "tailor path not found. Searched in ""$Tailor_paths"
+    exit 1
+fi
+
+if [[ -z $1 ]]; then
+    fname="$Tailor_path"/deepspeech-0.6.1-models/audio/"$(date -Is)".wav
+    echo "writing to audiofile $fname"
+    ffmpeg -f alsa -i default "$fname"
 else
+    echo nono
     fname=$1
 fi
 
-deepspeech --model ~/Tailor/deepspeech-0.6.1-models/deepspeech-0.6.1-models/output_graph.pbmm --audio $fname
+model_path=$Tailor_path/deepspeech-0.6.1-models/deepspeech-0.6.1-models/output_graph.pbmm
+
+deepspeech --model "$model_path" --audio "$fname"
+
+mplayer "$fname"
 
 exit 0

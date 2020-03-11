@@ -1,40 +1,42 @@
 #!/bin/bash
 
-debug=''
-
-if [[ -z "$1" || -z "$2" ]]
-then
-  echo Usage: $(basename $0) file_directory dimentions
-  echo The file_directory should contain all the files that should be prepared for printing.
-  echo Dimentions should be of the form AxB where A and B are the number of pages to put on one page.
-  exit 0
-fi
-
-if debug; then
-  echo set dir $1
-  echo set dim $2
-  echo $(pwd)
-  exit 1
-fi
+usage() {
+    echo Usage: $(basename $0) file_directory dimentions
+    echo The file_directory should contain all the files that should be prepared for printing.
+    echo Dimentions should be of the form AxB where A and B are the number of pages to put on one page.
+}
 
 dir=$1
 dim=$2
+
+debug=''
+
+[[ -z "$1" || -z "$2" ]] && usage && exit 0
+
+echo FIXME this script seems broken and produces invalid pdfs
+exit 1
+
+if debug; then
+  echo set dir $dir
+  echo set dim $dim
+  echo $(pwd)
+  exit 1
+fi
 
 cd dir
 echo Converting ptts to pdfs if existant
 libreoffice --headless --invisible --convert-to pdf *ppt*
 
-
 echo generating print ready pdfs
 mkdir print_ready
 for f in *.pdf; do
   if [[ -f $f ]]; then
-    echo ---------$f
+    echo =====================> $f
     pdfnup --nup $dim --outfile "print_ready/$f" "$f"
   fi
 done
 
-echo moveing ppt and pptx files to seperate directory
+echo moving ppt and pptx files to seperate directory
 mkdir ppt
 for f in $(find *.ppt* -maxdepth 1 -type f); do
   mv $f ppt/$f
