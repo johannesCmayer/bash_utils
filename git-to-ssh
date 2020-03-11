@@ -36,11 +36,18 @@ set_url() {
 }
 
 ROOT_SEARCH=$1
-echo $ROOT_SEARCH
+echo "Starting reccursive search for repos from $ROOT_SEARCH"
+dirs=$(find "$ROOT_SEARCH" -name .git -type d)
+if [[ -z $dirs ]]; then
+  echo "No git repos found with recursive search from $ROOT_SEARCH"
+  exit 1
+fi
 if [[ ! -z "$ROOT_SEARCH" ]]; then
-  read -p "We will recursively search for repositories in $ROOT_SEARCH and set the url to be ssh! proceed? y/n" -n 1 -r
+  for repo in $dirs; do echo $repo; done
+  read -p "Listed repos found with recursive search from $ROOT_SEARCH. Convert all urls to ssh? y/n" -n 1 -r
+  echo
   [[ $REPLY =~ ^[Yy]$ ]] || exit 0
-  for f in $(find ~/data/ -name .git -type d); do
+  for f in $dirs; do
     cd "$f"
     set_url
   done
@@ -49,3 +56,4 @@ else
 fi
 
 exit 0
+
