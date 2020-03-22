@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -e
+
+cleanup() {
+  echo cleaning up tmp files
+  rm $tmp_path/*
+  rm -d $tmp_path
+}
+
+file=$1
+noise_remove_strength=0.3
+noise_sample_length="00:00:02"
+tmp_path="/tmp/$(basename $0).$$"
+
+echo removing noise from $file
+echo using $tmp_path as tmp directory
+
+trap cleanup EXIT
+
+if [[ -d $tmp_path ]]; then
+  echo Warning tmp dir $tmp_path exists, exiting.
+  exit 1
+else
+  mkdir $tmp_path
+fi
+
+ffmpeg_options="-hide_banner -loglevel warning"
+ffmpeg $ffmpeg_options -i $file -t $noise_sample_length $tmp_path/noise_sample.wav
+ffmpeg $ffmpeg_options -i $file $tmp_path/audio.wav
+sox $tmp_path/noise_sample.wav -n noiseprof $tmp_path/noise_profile
+sox $tmp_path/audio.wav $tmp_path/clean_audio.wav noisered $tmp_path/noise_profile $noise_remove_strength
+ffmpeg $ffmpeg_options -i $file -i $tmp_path/clean_audio.wav -c:v copy -map 0:v:0 -map 1:a:0 ${file%.*}_cleaned.${file##*.}
