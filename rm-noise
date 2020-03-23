@@ -2,20 +2,28 @@
 
 set -e
 
+programm_name=$(basename $0)
+
 cleanup() {
   echo cleaning up tmp files
   rm $tmp_path/*
   rm -d $tmp_path
 }
 
+help_message() {
+  echo "usage:"
+  echo "  $programm_name file [noise_sample_start=00:00:00 noise_sample_end=00:00:02] [noise_reduction_strength=0.3]"
+}
+
 file=$1
-noise_remove_strength=0.3
-noise_sample_length="00:00:02"
+
+if [ -z $file ] || [ $file == -h ] || [ $file == --help ]; then
+  help_message
+  exit 0
+fi
+
 tmp_path="/tmp/$(basename $0).$$"
 ffmpeg_options="-hide_banner -loglevel warning"
-
-echo removing noise from $file
-echo using $tmp_path as tmp directory
 
 trap cleanup EXIT
 
@@ -26,10 +34,42 @@ else
   mkdir $tmp_path
 fi
 
-ffmpeg $ffmpeg_options -i $file -t $noise_sample_length $tmp_path/noise_sample.wav
+echo tmp dir is $tmp_path
+
+# Parse args
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+noise_sample_start="$2"
+noise_sample_end="$3"
+
+if { [ ! -z "$noise_sample_start" ] && [ -z "$noise_sample_end" ]; } || \
+   { [ -z "$noise_sample_start" ] && [ ! -z "$noise_sample_end" ]; }; then
+  echo invalid arguments, either both noise_sample_start and noise_sample end need to be provided, or none need to be provided
+  exit 1
+fi 
+if [ -z "$noise_sample_start" ] || [ -z "$noise_sample_end" ]; then
+  noise_sample_start="00:00:00"
+  noise_sample_end="00:00:02"
+fi
+echo noise_sample_end: $noise_sample_start
+echo noise_sample_end: $noise_sample_end
+
+noise_remove_strength=$4
+if [ -z $noise_remove_strength ]; then
+  noise_remove_strength="0.3"
+fi
+echo noise_remove_strength: $noise_remove_strength
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+echo Extracting noise sample
+ffmpeg $ffmpeg_options -i $file -ss $noise_sample_start -to $noise_sample_end $tmp_path/noise_sample.wav
+echo Exporting audio
 ffmpeg $ffmpeg_options -i $file $tmp_path/audio.wav
+echo Creating noise profile
 sox $tmp_path/noise_sample.wav -n noiseprof $tmp_path/noise_profile
+echo remove noise from audio
 sox $tmp_path/audio.wav $tmp_path/clean_audio.wav noisered $tmp_path/noise_profile $noise_remove_strength
+echo merge audio into video
 ffmpeg $ffmpeg_options -i $file -i $tmp_path/clean_audio.wav -c:v copy -map 0:v:0 -map 1:a:0 ${file%.*}_cleaned.${file##*.}
 
 exit 0
