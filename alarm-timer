@@ -1,0 +1,64 @@
+#!/bin/bash
+# This is a simple terminal alarm clock
+
+help_message() {
+  echo "usage: $(basename $0) [OPTIONS] secondsToAlarm [OPTIONS]"
+  echo "       Arguments to long options are also requried for short options."
+  echo ""
+  echo "Options:"
+  echo "  -w, --wait: Dont terminate timer but wait and repeat a message"
+  echo "              after the time runs out."
+  echo "  -m, --message MESSAGE: The message to say when time is up."
+  echo "                 default=\"What the fuck, your time is up!\""
+  echo "  -h, --help: Display this message."
+}
+
+while test $# -gt 0
+do
+  case "$1" in
+    -h|--help) help_message; exit 0
+      ;;
+    -w|--wait) wait_on_exit="T"
+      ;;
+    -m|--message) message=$2; shift
+      ;;
+    -*) echo "Bad option $1"; exit 1
+      ;;
+     *) time="$1"
+      ;;
+  esac
+  shift
+done
+
+if [ -z "$time" ]; then
+  help_message
+  exit 1
+fi
+
+seconds="$time"
+
+START_TIME=$(date '+%s')o
+END_TIME=$(date '+%s' -d "+ $seconds seconds")
+echo "End time $(date -d "+ $seconds seconds")"
+
+while true; do
+    sec_remaining=$((END_TIME - $(date '+%s')))
+    echo -ne "\r\033[K"$((sec_remaining / 60))m $((sec_remaining % 60))s to activation
+    [[ "$sec_remaining" -le 0 ]] && break
+    sleep 1
+done
+echo -e "\nPlease terminate $(basename $0), pid $$"
+
+if [ -z "$message" ]; then
+  message="What the fuck, your time is up!"
+fi
+
+say "$message"
+
+if [ ! -z "$wait_on_exit" ]; then
+  while true; do
+    sleep 4
+    say "Please terminate $(basename $0), p i d $$"
+  done
+fi
+exit 0

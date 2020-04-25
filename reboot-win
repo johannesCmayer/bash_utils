@@ -1,3 +1,4 @@
 #!/bin/bash
-sudo grub-reboot 2
-sudo systemctl reboot
+sudo swapon /swapfile
+sudo grub-reboot "Windows 10 (on /dev/sdd1)"
+sudo s2disk -P "shutdown method = reboot"
