@@ -47,7 +47,6 @@ while true; do
     [[ "$sec_remaining" -le 0 ]] && break
     sleep 1
 done
-echo -e "\nPlease terminate $(basename $0), pid $$"
 
 if [ -z "$message" ]; then
   message="What the fuck, your time is up!"
@@ -56,6 +55,7 @@ fi
 say "$message"
 
 if [ ! -z "$wait_on_exit" ]; then
+  echo -e "\nPlease terminate $(basename $0), pid $$"
   while true; do
     sleep 4
     say "Please terminate $(basename $0), p i d $$"
