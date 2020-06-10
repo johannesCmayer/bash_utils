@@ -49,10 +49,10 @@ if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
   exit 1
 fi
 
-if [ ! -z $(command -v say) ]; then
+if [ ! -z $(command -v espeak) ]; then
+  speak_cmd="espeak -s 80 -p 0"
+elif [ ! -z $(command -v say) ]; then
   speak_cmd="say"
-elif [ ! -z $(command -v espeak) ]; then
-  speak_cmd="espeak"
 else
   echo "No tts command found"; exit 1
 fi
