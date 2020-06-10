@@ -49,7 +49,17 @@ if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
   exit 1
 fi
 
-say "Go"
+if [ ! -z $(command -v say) ]; then
+  speak_cmd="say"
+elif [ ! -z $(command -v espeak) ]; then
+  speak_cmd="espeak"
+else
+  echo "No tts command found"; exit 1
+fi
+
+echo "speak command: $speak_cmd"
+
+$speak_cmd "Go"
 
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
@@ -67,13 +77,13 @@ if [ -z "$message" ]; then
   message="What the fuck, your time is up!"
 fi
 
-say "$message"
+$speak_cmd "$message"
 
 if [ ! -z "$wait_on_exit" ]; then
   echo -e "\nPlease terminate $(basename $0), pid $$"
   while true; do
     sleep 4
-    say "Please terminate $(basename $0), p i d $$"
+    $speak_cmd "Please terminate $(basename $0), p i d $$"
   done
 fi
 exit 0
