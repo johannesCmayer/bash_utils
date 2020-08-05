@@ -44,12 +44,26 @@ do
   shift
 done
 
-if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
-  help_message
+#if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
+#  help_message
+#  exit 1
+#fi
+
+speed=175
+pitch=50
+
+if [ ! -z $(command -v espeak) ]; then
+  speak_cmd="espeak -s $speed -p $pitch"
+elif [ ! -z $(command -v say) ]; then
+  speak_cmd="say"
+else
+  echo "No tts command found"
   exit 1
 fi
 
-say "Go"
+echo "speak command: $speak_cmd"
+
+$speak_cmd "Go"
 
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
@@ -64,16 +78,16 @@ while true; do
 done
 
 if [ -z "$message" ]; then
-  message="What the fuck, your time is up!"
+  message="Your time is up!"
 fi
 
-say "$message"
+$speak_cmd "$message"
 
 if [ ! -z "$wait_on_exit" ]; then
   echo -e "\nPlease terminate $(basename $0), pid $$"
   while true; do
     sleep 4
-    say "$message"
+    $speak_cmd say "$message"
   done
 fi
 exit 0
