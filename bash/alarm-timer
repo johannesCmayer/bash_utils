@@ -6,7 +6,7 @@ help_message() {
   echo "       Arguments to long options are also requried for short options."
   echo ""
   echo "Options:"
-  echo "  -w, --wait: Dont terminate timer but wait and repeat a message"
+  echo "  -w, --wait: Dont terminate timer but wait and repeat the message"
   echo "              after the time runs out."
   echo "  --message MESSAGE: The message to say when time is up."
   echo "                 default=\"What the fuck, your time is up!\""
@@ -73,7 +73,7 @@ if [ ! -z "$wait_on_exit" ]; then
   echo -e "\nPlease terminate $(basename $0), pid $$"
   while true; do
     sleep 4
-    say "Please terminate $(basename $0), p i d $$"
+    say "$message"
   done
 fi
 exit 0
