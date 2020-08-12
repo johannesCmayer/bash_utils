@@ -87,7 +87,7 @@ if [ ! -z "$wait_on_exit" ]; then
   echo -e "\nPlease terminate $(basename $0), pid $$"
   while true; do
     sleep 4
-    $speak_cmd say "$message"
+    $speak_cmd "$message"
   done
 fi
 exit 0

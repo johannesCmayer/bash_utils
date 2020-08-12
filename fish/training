@@ -1,0 +1,27 @@
+#!/usr/bin/fish
+
+function exercise
+  espeak "$argv[1]"
+  sleep 5
+  alarm-timer $argv[2]
+end
+
+exercise "Bear crawl" 60
+exercise "Backwards plank" 60
+read
+exercise "Backwards plank" 60
+read
+exercise "Backwards plank" 60
+read
+exercise "forward stretch" 80
+read
+exercise "Knee pull sit" 80
+exercise "Angled knee lie" 80
+exercise "foot lotus" 80
+exercise "half lotus right" 80
+exercise "half lotus left" 80
+exercise "left outward bend" 80
+exercise "full lotus" 80
+exercise "forwand stretch" 80
+
+exit 0
