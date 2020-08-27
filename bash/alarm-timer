@@ -4,6 +4,8 @@
 message="Your time is up!"
 imessage="Go"
 
+espeakargs=""
+
 speed=175
 pitch=50
 
@@ -26,6 +28,8 @@ help_message() {
   echo "                 to passing the seconds as an argument."
   echo "  -m, --minutes: Minutes to alarm."
   echo "  -h, --hours: Hours to alarm."
+  echo "  -e, --espeakargs: The args to pass to espeak (or say if espeak"
+  echo "                    is not found) as one string."
   echo "  --help: Display this message."
 }
 
@@ -46,6 +50,8 @@ do
       ;;
     -h|--hours) hours=$2; shift
       ;;
+    -e|--espeakargs) espeakargs=$2; shift
+      ;;
     -*) echo "Bad option $1"; exit 1
       ;;
      *) seconds="$1"
@@ -61,7 +67,7 @@ fi
 
 
 if [ ! -z $(command -v espeak) ]; then
-  speak_cmd="espeak -s $speed -p $pitch"
+  speak_cmd="espeak $espeakargs"
 elif [ ! -z $(command -v say) ]; then
   speak_cmd="say"
 else
