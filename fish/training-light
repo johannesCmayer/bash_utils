@@ -8,11 +8,16 @@ end
 
 exercise "forward stretch" 80
 read
+espeak "Hip rotatio warmup"
+read
+#exercise "Knee pull sit" 80
+#exercise "Angled knee lie" 80
 exercise "foot lotus" 80
-exercise "half lotus right" 80
 exercise "half lotus left" 80
+exercise "half lotus right" 80
 exercise "left outward bend" 80
-exercise "full lotus" 80
+exercise "half lotus left" 80
 exercise "forwand stretch" 80
+espeak "Training Complete"
 
 exit 0

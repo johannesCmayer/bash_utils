@@ -1,6 +1,16 @@
 #!/bin/bash
 # This is a simple terminal alarm clock
 
+message="Your time is up!"
+imessage="Go"
+
+speed=175
+pitch=50
+
+seconds=0
+minutes=0
+hours=0
+
 help_message() {
   echo "usage: $(basename $0) [OPTIONS] secondsToAlarm [OPTIONS]"
   echo "       Arguments to long options are also requried for short options."
@@ -8,18 +18,16 @@ help_message() {
   echo "Options:"
   echo "  -w, --wait: Dont terminate timer but wait and repeat the message"
   echo "              after the time runs out."
-  echo "  --message MESSAGE: The message to say when time is up."
-  echo "                 default=\"What the fuck, your time is up!\""
+  echo "  --em MESSAGE: The message to say when time is up."
+  echo "                 default=\"$message\""
+  echo "  --im MESSAGE: The message to say when starting the timer."
+  echo "                 default=\"$imessage\""
   echo "  -s, --seconds: Seconds to alarm. Can be used as alternative"
   echo "                 to passing the seconds as an argument."
   echo "  -m, --minutes: Minutes to alarm."
   echo "  -h, --hours: Hours to alarm."
   echo "  --help: Display this message."
 }
-
-seconds=0
-minutes=0
-hours=0
 
 while test $# -gt 0
 do
@@ -28,7 +36,9 @@ do
       ;;
     -w|--wait) wait_on_exit="T"
       ;;
-    --message) message=$2; shift
+    --em) message=$2; shift
+      ;;
+    --im) imessage=$2; shift
       ;;
     -s|--seconds) seconds=$2; shift
       ;;
@@ -44,13 +54,11 @@ do
   shift
 done
 
-#if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
-#  help_message
-#  exit 1
-#fi
+if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
+  help_message
+  exit 1
+fi
 
-speed=175
-pitch=50
 
 if [ ! -z $(command -v espeak) ]; then
   speak_cmd="espeak -s $speed -p $pitch"
@@ -63,7 +71,7 @@ fi
 
 echo "speak command: $speak_cmd"
 
-$speak_cmd "Go"
+$speak_cmd "$imessage"
 
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
@@ -76,10 +84,6 @@ while true; do
     [[ "$sec_remaining" -le 0 ]] && break
     sleep 1
 done
-
-if [ -z "$message" ]; then
-  message="Your time is up!"
-fi
 
 $speak_cmd "$message"
 
