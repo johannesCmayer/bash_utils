@@ -82,13 +82,20 @@ $speak_cmd "$imessage"
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
 READABLE_END_TIME=$(date -d "+ $hours hours + $minutes minutes + $seconds seconds")
-echo "End time: $READABLE_END_TIME"
+# echo "End time: $READABLE_END_TIME"
 
+sec_remaining=$((END_TIME - $(date '+%s')))
 while true; do
-    sec_remaining=$((END_TIME - $(date '+%s')))
-    echo -ne "\r\033[K"$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s to activation
+    sec_remaining="$(($sec_remaining-1))"
+    echo -ne "\r\033[K"$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
     [[ "$sec_remaining" -le 0 ]] && break
-    sleep 1
+    ans=""
+    if read -n1 -t1 -s ans; then
+      printf " <> pause"
+      while [ ! -z $(read -n1 -s ans) ]; do
+        :
+      done
+    fi
 done
 
 $speak_cmd "$message"
