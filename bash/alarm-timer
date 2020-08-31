@@ -30,6 +30,7 @@ help_message() {
   echo "  -h, --hours: Hours to alarm."
   echo "  -e, --espeakargs: The args to pass to espeak (or say if espeak"
   echo "                    is not found) as one string."
+  echo "  -v, --verbose: Enable additional output."
   echo "  --help: Display this message."
 }
 
@@ -51,6 +52,8 @@ do
     -h|--hours) hours=$2; shift
       ;;
     -e|--espeakargs) espeakargs=$2; shift
+      ;;
+    -v|--verbose) verbose=1; shift
       ;;
     -*) echo "Bad option $1"; exit 1
       ;;
@@ -75,7 +78,7 @@ else
   exit 1
 fi
 
-echo "speak command: $speak_cmd"
+[ verbose = 1 ] && echo "speak command: $speak_cmd"
 
 $speak_cmd "$imessage"
 
