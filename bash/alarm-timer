@@ -3,6 +3,7 @@
 
 message="Your time is up!"
 imessage="Go"
+prompt=""
 
 espeakargs=""
 
@@ -28,6 +29,7 @@ help_message() {
   echo "                 to passing the seconds as an argument."
   echo "  -m, --minutes: Minutes to alarm."
   echo "  -h, --hours: Hours to alarm."
+  echo "  -t, --text: text to show before timer."
   echo "  -e, --espeakargs: The args to pass to espeak (or say if espeak"
   echo "                    is not found) as one string."
   echo "  -v, --verbose: Enable additional output."
@@ -54,6 +56,8 @@ do
     -e|--espeakargs) espeakargs=$2; shift
       ;;
     -v|--verbose) verbose=1;
+      ;;
+    -t|--text) text="$2"": "; shift
       ;;
     -*) echo "Bad option $1"; exit 1
       ;;
@@ -90,7 +94,7 @@ READABLE_END_TIME=$(date -d "+ $hours hours + $minutes minutes + $seconds second
 sec_remaining=$((END_TIME - $(date '+%s')))
 while true; do
     sec_remaining="$(($sec_remaining-1))"
-    echo -ne "\r\033[K"$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
+    echo -ne "\r\033[K"$text$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
     [[ "$sec_remaining" -le 0 ]] && break
     ans=""
     if read -n1 -t1 -s ans; then
