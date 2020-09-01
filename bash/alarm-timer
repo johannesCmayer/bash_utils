@@ -88,7 +88,6 @@ fi
 
 [ verbose = 1 ] && echo "speak command: $speak_cmd"
 
-$speak_cmd "$imessage"
 
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
@@ -97,6 +96,7 @@ READABLE_END_TIME=$(date -d "+ $hours hours + $minutes minutes + $seconds second
 
 sec=$((END_TIME - $(date '+%s')))
 while true; do
+  $speak_cmd "$imessage"
   sec_remaining=sec
   while true; do
       sec_remaining="$(($sec_remaining-1))"
