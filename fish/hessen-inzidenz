@@ -1,0 +1,21 @@
+#!/usr/bin/fish
+
+set data_path "/home/johannes/data/websites/hessen_idizens"
+
+cd $data_path
+for arg in $argv
+  switch $arg
+    case "update"
+      for i in (printf "%02d\n" (seq 10 (date +%m)))                                                          
+        for j in (printf "%02d\n" (seq 32))
+          wget "https://soziales.hessen.de/sites/default/files/media/hsm/2020_"$i"_"$j"_bulletin_coronavirus.pdf"
+        end
+      end
+    case "list"
+      pdfgrep "SK Darmstadt" *.pdf
+    case '*'
+      echo "argument not found (one required)"
+  end
+end
+
+exit 0

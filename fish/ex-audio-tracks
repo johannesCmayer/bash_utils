@@ -1,0 +1,9 @@
+
+file=""
+for i in (seq 2)
+  if not ffmpeg -i $file -map 0:$i -vn output$i.wav
+  echo "FFMPEG ERROR"
+  exit 1
+end
+rm $file
+

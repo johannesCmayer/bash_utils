@@ -1,0 +1,44 @@
+#!/usr/bin/fish
+function bwlimit
+  if [ (date +%H) -ge 0 -a (date +%H) -le 7 ]
+    echo 1000
+  else
+    echo "BLOCK"
+  end
+end
+
+function upload
+  echo "====================================="
+  set -l i $argv[1]
+  set source $i
+  set dest $gdrive(dirname (echo $i | sed "s|$borg||"))
+  echo current bwlimit: (bwlimit)
+  echo source: $source
+  echo dest: $dest
+  echo filesize: (du -h $i)
+  rclone copy $source $dest --bwlimit (bwlimit) --fast-list --progress -v
+end
+
+echo "__          __              _             "
+echo "\ \        / /             (_)            "
+echo " \ \  /\  / /_ _ _ __ _ __  _ _ __   __ _ "
+echo "  \ \/  \/ / _` | '__| '_ \| | '_ \ / _` |"
+echo "   \  /\  / (_| | |  | | | | | | | | (_| |"
+echo "    \/  \/ \__,_|_|  |_| |_|_|_| |_|\__, |"
+echo "                                     __/ |"
+echo "                                    |___/ " 
+echo "This is not a good script, best check the source to see if it does what you want"
+
+set borg "/mnt/internal_backup/borg_primary"
+set gdrive "gdrive:/backups/borg_primary"
+
+set -x RCLONE_CONFIG_PASS (read -sp 'echo enter rclone passcode to start anyway: ')
+
+for i in (find "$borg" -type f -exec ls -al {} \; | sort -k 5 -r -n | sed 's/ \+/\t/g' | cut -f 9)
+  while [ (bwlimit) = "BLOCK" ]
+    printf "sleeping\r"
+    sleep 10
+  end
+  upload $i
+end
+
