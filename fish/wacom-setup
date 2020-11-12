@@ -18,10 +18,10 @@ function miro
   xsetwacom set "$pen_id" maptooutput "HEAD-1"
   xsetwacom set "$pen_id" area 0 0 55200 31050
 
-  xsetwacom set "$pen_id" button 2 "key p"
+  xsetwacom set "$pen_id" button 3 "key shift"
 
   xsetwacom set "$pad_id" button (button-map 1) "key ctrl z"
-  xsetwacom set "$pad_id" button (button-map 2) "key shift 2"
+  xsetwacom set "$pad_id" button (button-map 2) "key ctrl shift z"
   xsetwacom set "$pad_id" button (button-map 3) "key shift 3"
   xsetwacom set "$pad_id" button (button-map 4) "key shift 4"
   xsetwacom set "$pad_id" button (button-map 5) "key p"

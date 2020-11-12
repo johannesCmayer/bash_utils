@@ -78,9 +78,16 @@ fi
 
 
 if [ ! -z $(command -v espeak) ]; then
-  speak_cmd="espeak $espeakargs"
+  function speak_cmd {
+     amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
+     [ verbose = 1 ] && echo "espeak $espeakargs $1"
+     espeak $espeakargs "$1"
+     amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
+   }
 elif [ ! -z $(command -v say) ]; then
-  speak_cmd="say"
+  function speak_cmd {
+    "say" $1
+  }
 else
   echo "No tts command found"
   exit 1
@@ -96,7 +103,7 @@ READABLE_END_TIME=$(date -d "+ $hours hours + $minutes minutes + $seconds second
 
 sec=$((END_TIME - $(date '+%s')))
 while true; do
-  $speak_cmd "$imessage"
+  speak_cmd "$imessage"
   sec_remaining=sec
   while true; do
       sec_remaining="$(($sec_remaining-1))"
@@ -111,13 +118,13 @@ while true; do
       fi
   done
 
-  $speak_cmd "$message"
+  speak_cmd "$message"
 
   if [ ! -z "$wait_on_exit" ]; then
     echo -e "\nPlease terminate $(basename $0), pid $$"
     while true; do
       sleep 4
-      $speak_cmd "$message"
+      speak_cmd "$message"
     done
   fi
 
