@@ -1,0 +1,28 @@
+#!/usr/bin/fish
+
+set export_name krita_export
+
+for i in $argv
+  switch "$i"
+    case '*.kra'
+      set no_ex_names $no_ex_names (basename "$i" .kra)
+      echo "$i" --- OK
+    case '*'
+      echo "Error you need to specify a list of .kra files. $i is not a .kra file"
+      exit 1
+  end
+end
+
+for i in $no_ex_names
+  krita --export $i.kra --export-filename $i.png
+  convert $i.png $i.pdf
+end
+
+pdfunite {$no_ex_names}.pdf $export_name.pdf
+
+for i in $no_ex_names
+  rm $i.png
+  rm $i.pdf
+end
+
+du -h $export_name.pdf

@@ -1,0 +1,7 @@
+#!/usr/bin/fish
+
+set dirname $argv[1]
+
+mkdir $dirname
+mkdir $dirname/notes
+mkdir $dirname/aufgaben
