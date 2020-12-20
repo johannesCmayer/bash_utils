@@ -1,0 +1,20 @@
+#!/usr/bin/fish
+
+set minutes $argv[1]
+set hours $argv[2]
+
+if [ -z $minutes ]
+  date +%H:%M
+  exit 0
+end
+
+if not [ -z $minutes ]
+  set minutes "$minutes minutes"
+end
+
+if not [ -z $hours ]
+  set hours "$hours hours"
+end
+
+date --date "$hours $minutes" +%H:%M
+exit 0

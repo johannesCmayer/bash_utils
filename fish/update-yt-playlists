@@ -1,0 +1,42 @@
+#!/usr/bin/fish
+
+set playlist_path "/home/johannes/data/audio/consume/music/youtube_playlists"
+set archive_name "ytdl-archive.txt"
+echo playlist_path: $playlist_path
+
+set fails
+
+function dl
+    set directory "$argv[1]"
+    set playlisturl "$argv[2]"
+    cd "$playlist_path"; or exit 1
+    cd "$directory"; or exit 1
+    if [ ! -f $archive_name ]
+      touch ytdl-archive.txt
+    end
+    if not youtube-dl --ignore-errors "$playlisturl" --download-archive $archive_name
+        set fails $fails "$directory"
+    end
+    cd "$playlist_path"; or exit 1
+end
+
+dl vocaloid "https://www.youtube.com/watch?v=KNrdGx69pCo&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=2&t=0s"
+dl vocaloid "https://www.youtube.com/watch?v=I25Cqlr5_Sc&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=201"
+
+dl dance "https://www.youtube.com/watch?v=ir6nk2zrMG0&list=PLarKqD2Ythc61dzfv6ZQKzrPGmVOyVWXO&index=2&t=0s"
+dl dance "https://www.youtube.com/watch?v=V_6gGWEQzdo&list=PLarKqD2Ythc61dzfv6ZQKzrPGmVOyVWXO&index=201"
+
+dl dance_moves "https://www.youtube.com/watch?v=v65h-2uPBPQ&list=PLarKqD2Ythc6n_Z8SFLcpC7UFfNgiUbJ1&index=2&t=0s"
+dl ミク "https://www.youtube.com/watch?v=QJqVZw-mmhs&list=PLarKqD2Ythc5jpoHk_8EW_jYwtCDBJ3E8&index=1"
+dl "ミク、コンサート" "https://www.youtube.com/watch?v=vtZQ0DYgjdE&list=PLarKqD2Ythc6n6iucr9iGAH7wW42g22cH&index=2&t=1662s"
+dl イア "https://www.youtube.com/watch?v=pdenALKNA8w&list=PLarKqD2Ythc6iuoUn_8YVk_eBZJEDMAit&index=1"
+dl rap_beats "https://www.youtube.com/watch?v=ReF6iQ7M5_A&list=PLarKqD2Ythc7F7KxBNHGbcHu-bVNUncNd&index=1"
+dl リン "https://www.youtube.com/watch?v=9LABbFTQfXs&list=PLarKqD2Ythc77x5M1L5iMk-6lEIdwYdON&index=1"
+dl オネ "https://www.youtube.com/playlist?list=PLarKqD2Ythc7dFGdfN6FGXvN0CZ18QxCM"
+
+echo "Fails in:"
+for i in $fails
+    echo $i
+end
+
+echo dir size is now: (du -hs $playlist_path)

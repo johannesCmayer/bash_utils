@@ -1,0 +1,16 @@
+#!/usr/bin/fish
+
+set template_dir /home/johannes/data/templates
+
+switch $argv[1]
+  case list
+    ls $template_dir
+  case '*'
+    set template_name $argv[1]
+    set file_name $argv[2]
+    if [ -z $file_name ]
+      echo "Empty file name not allowed"
+      exit 1
+    end
+    cp $template_dir/$template_name ./$file_name
+end
