@@ -6,7 +6,7 @@ i=0
 music1=$HOME/music/*Netgame*
 
 while true; do
-  espeak "$((i*80/60)) hours $((i%60)) minutes."
+  espeak "$((i*80/60)) hours. $(((i*80)%60)) minutes." -s 100
   espeak "are you sleeping"
   #sleep 1
   #espeak "Are you sleeping?" -s 150
@@ -14,6 +14,10 @@ while true; do
   #espeak "Are you sleeping?" -s 100
   if [ $i = 4 ]; then
     mpv mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
+  fi
+
+  if [ $i >= 5 ]; then
+    espeak "Wake up"
   fi
   #alarm-timer -m 80 --im "" --em ""
   i=$(($i + 1))
