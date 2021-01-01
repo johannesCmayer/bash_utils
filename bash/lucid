@@ -10,20 +10,20 @@ debug=true
 
 espeak "lucid-script start."
 espeak "block one starts in $init_wait minutes"
-if ! debug; then
+if ! $debug; then
   sleep "$init_mait"m
 fi
 
 while true; do
   if [ i -gt 0 ]; then
     espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130
-  fi
-  if ! debug; then
-    espeak "are you sleeping"
-    sleep 1
-    espeak "Are you sleeping?" -s 150
-    sleep 3
-    espeak "Are you sleeping?" -s 100
+    if ! $debug; then
+      espeak "are you sleeping"
+      sleep 1
+      espeak "Are you sleeping?" -s 150
+      sleep 3
+      espeak "Are you sleeping?" -s 100
+    fi
   fi
   if [ $i = 4 ]; then
     mpv mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
@@ -43,7 +43,7 @@ while true; do
     done
   fi
 
-  if ! debug; then
+  if ! $debug; then
     alarm-timer -m 80 --im "" --em ""
   fi
 
