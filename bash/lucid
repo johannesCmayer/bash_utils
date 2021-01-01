@@ -16,8 +16,13 @@ while true; do
     mpv mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
   fi
 
-  if [ $i >= 5 ]; then
+  if [ $i -ge 6 ]; then
     espeak "Wake up"
+  fi
+  if [ $i -ge 7 ]; then
+    for i in $(seq 10); do
+      espeak "Wake up"
+    done
   fi
   #alarm-timer -m 80 --im "" --em ""
   i=$(($i + 1))
