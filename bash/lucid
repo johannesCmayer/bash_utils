@@ -1,0 +1,9 @@
+#!/bin/bash
+
+espeak "go"
+i=0
+while true; do
+  espeak "$((i*80)) minutes"
+  alarm-timer -m 80 --im "" --em ""
+  i=$(($i + 1))
+done
