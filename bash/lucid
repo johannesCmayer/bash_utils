@@ -5,25 +5,47 @@ i=0
 
 music1=$HOME/music/*Netgame*
 
+init_wait=15
+debug=true
+
+espeak "lucid-script start."
+espeak "block one starts in $init_wait minutes"
+if ! debug; then
+  sleep "$init_mait"m
+fi
+
 while true; do
-  espeak "block $i. $((i*80/60)) hours. $(((i*80)%60)) minutes." -s 130
-  espeak "are you sleeping"
-  #sleep 1
-  #espeak "Are you sleeping?" -s 150
-  #sleep 3
-  #espeak "Are you sleeping?" -s 100
+  if [ i -gt 0 ]; then
+    espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130
+  fi
+  if ! debug; then
+    espeak "are you sleeping"
+    sleep 1
+    espeak "Are you sleeping?" -s 150
+    sleep 3
+    espeak "Are you sleeping?" -s 100
+  fi
   if [ $i = 4 ]; then
     mpv mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
+  fi
+
+  if [ $i -ge 7 ]; then
+    mpv mpv --vo=null $music1 -ss 0 --end 11.5 --volume 80
   fi
 
   if [ $i -ge 6 ]; then
     espeak "Wake up"
   fi
+
   if [ $i -ge 7 ]; then
     for i in $(seq 10); do
       espeak "Wake up"
     done
   fi
-  #alarm-timer -m 80 --im "" --em ""
+
+  if ! debug; then
+    alarm-timer -m 80 --im "" --em ""
+  fi
+
   i=$(($i + 1))
 done
