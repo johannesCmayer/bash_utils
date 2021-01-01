@@ -6,7 +6,7 @@ i=0
 music1=$HOME/music/*Netgame*
 
 while true; do
-  espeak "$((i*80/60)) hours. $(((i*80)%60)) minutes." -s 100
+  espeak "$((i*80/60)) hours. $(((i*80)%60)) minutes." -s 120
   espeak "are you sleeping"
   #sleep 1
   #espeak "Are you sleeping?" -s 150
