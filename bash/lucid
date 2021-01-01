@@ -8,10 +8,10 @@ music1=$HOME/music/*Netgame*
 init_wait=15
 debug=false
 
-espeak "lucid-script start."
-espeak "block one starts in $init_wait minutes"
+espeak "start." -a 50
 if ! $debug; then
-  sleep "$init_mait"m
+  espeak "block one starts in $init_wait minutes" -a 50
+  alarm-timer -m "$init_wait" --em "" --im ""
 fi
 
 while true; do
