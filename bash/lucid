@@ -14,7 +14,7 @@ if ! $debug; then
 fi
 
 while true; do
-  if [ $i -gt 0 ]; then
+  if [ $i -ge 4 ]; then
     espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130 -a 50
     if ! $debug; then
       espeak "are you sleeping" -a 50
