@@ -1,6 +1,5 @@
 #!/bin/bash
 
-espeak "go"
 i=0
 
 music1=$HOME/music/*Netgame*
@@ -8,7 +7,7 @@ music1=$HOME/music/*Netgame*
 init_wait=15
 debug=false
 
-espeak "start." -a 50
+espeak "start" -a 50
 if ! $debug; then
   espeak "block one starts in $init_wait minutes" -a 50
   alarm-timer -m "$init_wait" --em "" --im ""
@@ -26,19 +25,16 @@ while true; do
 
     fi
   fi
-  if [ $i = 4 ]; then
+  if [ $i = 4 -o $i = 5 ]; then
     mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
   fi
 
-  if [ $i -ge 7 ]; then
-    mpv --vo=null $music1 -ss 0 --end 11.5 --volume 80
-  fi
-
-  if [ $i -ge 6 ]; then
+  if [ $i = 6 ]; then
     espeak "Wake up"
   fi
 
   if [ $i -ge 7 ]; then
+    mpv --vo=null $music1 -ss 0 --end 11.5 --volume 55
     for i in $(seq 10); do
       espeak "Wake up"
     done
