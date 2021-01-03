@@ -5,10 +5,23 @@ i=0
 music1=$HOME/music/*Netgame*
 
 init_wait=15
-debug=true
+debug=false
+if [ ! -z $1 ]; then
+  if [ $1 = 'debug' ]; then
+    debug=true
+  else
+    echo "invalid arg"
+    exit 1
+  fi
+fi
+
+meditation_time=5
 
 espeak "start" -a 50
 if ! $debug; then
+  epeak "$meditation_time minute medition starts in 10s"
+  sleep 10
+  alarm-timer -m 5 --em "Meditation complete"
   espeak "block one starts in $init_wait minutes" -a 50
   alarm-timer -m "$init_wait" --em "" --im ""
 fi
