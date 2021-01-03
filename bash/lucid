@@ -5,7 +5,7 @@ i=0
 music1=$HOME/music/*Netgame*
 
 init_wait=15
-debug=false
+debug=true
 
 espeak "start" -a 50
 if ! $debug; then
@@ -25,7 +25,7 @@ while true; do
 
     fi
   fi
-  if [ $i = 4 -o $i = 5 ]; then
+  if [ $i -ge 4 -a $i -le 6  ]; then
     mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
   fi
 
@@ -37,6 +37,7 @@ while true; do
     mpv --vo=null $music1 -ss 0 --end 11.5 --volume 55
     for i in $(seq 10); do
       espeak "Wake up"
+      sleep 6
     done
   fi
 
