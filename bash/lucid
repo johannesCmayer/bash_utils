@@ -22,6 +22,13 @@ if ! $debug; then
   espeak "$meditation_time minute meditation starts in 10 seconds"
   sleep 10
   alarm-timer -m 5 --em "Meditation complete"
+
+  espeak "1 minute lucid mantra"
+  sleep 1m
+
+  espeak "Do reality check"
+  sleep 5
+
   espeak "block one starts in $init_wait minutes" -a 50
   alarm-timer -m "$init_wait" --em "" --im ""
 fi
