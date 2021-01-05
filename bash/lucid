@@ -19,14 +19,14 @@ meditation_time=5
 
 espeak "start" -a 50
 if ! $debug; then
-  espeak "$meditation_time minute meditation starts in 10 seconds"
+  espeak "$meditation_time minute meditation starts in 10 seconds" -a 50
   sleep 10
-  alarm-timer -m 5 --em "Meditation complete"
+  alarm-timer -m 5 --em "Meditation complete" -e "-a 50"
 
-  espeak "1 minute lucid mantra"
+  espeak "1 minute lucid mantra" -a 50
   sleep 1m
 
-  espeak "Do reality check"
+  espeak "Do reality check" -a 50
   sleep 5
 
   espeak "block one starts in $init_wait minutes" -a 50
