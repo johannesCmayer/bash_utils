@@ -12,7 +12,7 @@ function alarm-timer {
     if $debug; then
         echo "skipping timer"
     else
-        command alarm-timer "$@"
+        command alarm-timer --im "" --em "" "$@"
     fi
 }
 
@@ -39,17 +39,18 @@ espeak "start"
 
 espeak "$meditation_time minute meditation starts in 10 seconds"
 alarm-timer 10
-alarm-timer -m 5 --em ""
+espeak "go"
+alarm-timer -m 5
 espeak "meditation complete"
 
 espeak "1 minute lucid mantra"
 alarm-timer -m 1
 
 espeak "Do reality check"
-alarm-timer 5 --em "" --im ""
+alarm-timer 5
 
 espeak "block one starts in $init_wait minutes"
-alarm-timer -m "$init_wait" --em "" --im ""
+alarm-timer -m "$init_wait"
 
 i=0
 while true; do
@@ -79,6 +80,6 @@ while true; do
         done
     fi
 
-    alarm-timer -m 80 --im "" --em ""
+    alarm-timer -m 80
     i=$(($i + 1))
 done
