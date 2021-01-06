@@ -21,6 +21,7 @@ function espeak {
     command espeak -a 50 "$@"
 }
 
+debug=false
 while [ $# -gt 0 ]; do
     case $@ in
         --debug)
