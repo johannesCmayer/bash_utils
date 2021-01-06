@@ -17,6 +17,7 @@ function alarm-timer {
 }
 
 function espeak {
+    echo "$@"
     command espeak -a 50 "$@"
 }
 
@@ -52,36 +53,31 @@ alarm-timer -m "$init_wait" --em "" --im ""
 i=0
 while true; do
     if [ $i -ge 4 ]; then
-        espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130
-        if ! $debug; then
-            espeak "are you sleeping"
-            sleep 1
-            espeak "Are you sleeping?" -s 150
-            sleep 2
-            espeak "Are you sleeping?" -s 100
-
-        fi
+        m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
+        espeak "$m" -s 130
+        espeak "Are you sleeping"
+        sleep 1
+        espeak "Are you sleeping?" -s 150
+        sleep 2
+        espeak "Are you sleeping?" -s 100
     fi
 
     if [ $i -ge 4 -a $i -le 6  ]; then
-        mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
+        mpv --vo=null $music1 --end 11.5 --volume 50
     fi
 
     if [ $i = 6 ]; then
-        espeak "Wake up"
+        espeak "Wake up" -s 140
     fi
 
     if [ $i -ge 7 ]; then
-        mpv --vo=null $music1 --end 11.5 --volume 55
-        for i in $(seq 5); do
-            espeak "Wake up"
+        mpv --vo=null $music1 --volume 55
+        for _ in $(seq 5); do
+            espeak "Wake up" -s 140
             sleep 3
         done
     fi
 
-    if ! $debug; then
-        alarm-timer -m 80 --im "" --em ""
-    fi
-
+    alarm-timer -m 80 --im "" --em ""
     i=$(($i + 1))
 done
