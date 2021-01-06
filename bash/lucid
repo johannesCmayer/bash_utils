@@ -1,69 +1,87 @@
 #!/bin/bash
 
-i=0
+# This program organises a routine of pre sleep activities to facilitate lucid dreaming
+# and tries to wake you up between sleep cycles so that you can try to go back to sleep
+# while applying a lucid dreaming technique. It also serves as a wakeup alarm clock.
 
 music1=$HOME/music/*Netgame*
-
-init_wait=15
-debug=false
-if [ ! -z $1 ]; then
-  if [ $1 = 'debug' ]; then
-    debug=true
-  else
-    echo "invalid arg"
-    exit 1
-  fi
-fi
-
 meditation_time=5
+init_wait=15
 
-espeak "start" -a 50
-if ! $debug; then
-  espeak "$meditation_time minute meditation starts in 10 seconds" -a 50
-  sleep 10
-  alarm-timer -m 5 --em "Meditation complete" -e "-a 50"
-
-  espeak "1 minute lucid mantra" -a 50
-  sleep 1m
-
-  espeak "Do reality check" -a 50
-  sleep 5
-
-  espeak "block one starts in $init_wait minutes" -a 50
-  alarm-timer -m "$init_wait" --em "" --im ""
-fi
-
-while true; do
-  if [ $i -ge 4 ]; then
-    espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130 -a 50
-    if ! $debug; then
-      espeak "are you sleeping" -a 50
-      sleep 1
-      espeak "Are you sleeping?" -s 150 -a 50
-      sleep 3
-      espeak "Are you sleeping?" -s 100 -a 50
-
+function alarm-timer {
+    if $debug; then
+        echo "skipping timer"
+    else
+        command alarm-timer "$@"
     fi
-  fi
-  if [ $i -ge 4 -a $i -le 6  ]; then
-    mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
-  fi
+}
 
-  if [ $i = 6 ]; then
-    espeak "Wake up"
-  fi
+function espeak {
+    command espeak -a 50 "$@"
+}
 
-  if [ $i -ge 7 ]; then
-    mpv --vo=null $music1 -ss 0 --end 11.5 --volume 55
-    for i in $(seq 10); do
-      espeak "Wake up"
-      sleep 6
-    done
-  fi
+while [ $# -gt 0 ]; do
+    case $@ in
+        --debug)
+            debug=true
+            shift
+            ;;
+        *)
+            echo "invalid arg"
+            exit 1
+            ;;
+    esac
+done
 
-  if ! $debug; then
-    alarm-timer -m 80 --im "" --em ""
-  fi
+espeak "start"
 
-  i=$(($i + 1))
+espeak "$meditation_time minute meditation starts in 10 seconds"
+alarm-timer 10
+alarm-timer -m 5 --em ""
+espeak "meditation complete"
+
+espeak "1 minute lucid mantra"
+alarm-timer -m 1
+
+espeak "Do reality check"
+alarm-timer 5 --em "" --im ""
+
+espeak "block one starts in $init_wait minutes"
+alarm-timer -m "$init_wait" --em "" --im ""
+
+i=0
+while true; do
+    if [ $i -ge 4 ]; then
+        espeak "block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes." -s 130
+        if ! $debug; then
+            espeak "are you sleeping"
+            sleep 1
+            espeak "Are you sleeping?" -s 150
+            sleep 2
+            espeak "Are you sleeping?" -s 100
+
+        fi
+    fi
+
+    if [ $i -ge 4 -a $i -le 6  ]; then
+        mpv --vo=null $music1 -ss 0 --end 11.5 --volume 50
+    fi
+
+    if [ $i = 6 ]; then
+        espeak "Wake up"
+    fi
+
+    if [ $i -ge 7 ]; then
+        mpv --vo=null $music1 --end 11.5 --volume 55
+        for i in $(seq 5); do
+            espeak "Wake up"
+            sleep 3
+        done
+    fi
+
+    if ! $debug; then
+        alarm-timer -m 80 --im "" --em ""
+    fi
+
+    i=$(($i + 1))
 done
