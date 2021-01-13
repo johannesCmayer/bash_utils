@@ -1,0 +1,60 @@
+#!/usr/bin/fish
+
+argparse -X 0 'w/whiter' 'r/redder' 'b/brighter' 'd/darker' 'R/direct-redness=' 'B/direct-brigtness=' -- $argv 
+or exit 1
+
+set redness_step 400
+set brightness_step 0.1
+
+set config $HOME/.redshift-mem
+
+touch $config
+set vars (cat $config)
+
+set brightness $vars[1]
+set redness $vars[2]
+
+if not set -q brightness
+  set brightness 1
+end
+if not set -q redness
+  set redness 5000
+end
+
+if set -q _flag_w
+  set redness (math "$redness + $redness_step")
+end
+if set -q _flag_r
+  set redness (math "$redness - $redness_step")
+end
+if set -q _flag_b
+  set brightness (math "$brightness + $brightness_step")
+end
+if set -q _flag_d
+  set brightness (math "$brightness - $brightness_step")
+end
+
+if [ $redness -ge 25000 ]
+  set redness 25000
+end
+if [ $redness -le 1000 ]
+  set redness 1000
+end
+if [ $brightness -ge 1 ]
+  set brightness 1
+end
+if [ $brightness -le 0.1 ]
+  set brightness 0.1
+end
+
+if set -q _flag_R
+  set redness $_flag_R
+end
+if set -q _flag_B
+  set brightness $_flag_B
+end
+
+echo -e "$brightness\n$redness" > $config
+cat $config
+
+redshift -O $redness -b $brightness
