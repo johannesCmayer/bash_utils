@@ -1,0 +1,2 @@
+#!/bin/bash
+mpv --vo=null -ss 8 "/mnt/data_main/audio/consume/music/youtube_playlists/vocaloid/Satisfaction by livetune feat. Hatsune Miku [1080 60 FPS]-rWPbopR7pdM.mkv"
