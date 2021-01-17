@@ -66,16 +66,13 @@ while true; do
 
     if [ $i -ge 4 -a $i -le 6  ]; then
         mpv --vo=null $music1 --end 11.5 --volume 50
+	echo "NO MUSIC"
     fi
 
-    if [ $i = 6 ]; then
-        espeak "Wake up" -s 140
-    fi
-
-    if [ $i -ge 7 ]; then
-        mpv --vo=null $music1 --volume 55
+    if [ $i -ge 6 ]; then
         for _ in $(seq 5); do
-            espeak "Wake up" -s 140
+            mpv --vo=null $music1 --volume 55
+            mpv --vo=null $music1 --volume 100
             sleep 3
         done
     fi
