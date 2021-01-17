@@ -1,0 +1,36 @@
+#!/usr/bin/env stack
+-- stack --resolver lts-16.26 script --package process --package directory
+
+import System.Environment
+import System.Exit
+import System.Process
+import System.IO
+import System.Directory
+
+bright_step = 0.1 :: Float
+red_step = 400 :: Int
+
+main = do
+  home_dir <- getHomeDirectory
+  f <- readFile $ config_file home_dir
+  let (b,r) = read . show . l_to_toup . lines $ f :: (Float, Int)
+  args <- getArgs
+  putStrLn $ unlines args
+  let (r, b) = parse r b args
+  writeFile (config_file home_dir) (unlines [show r, show b])
+  redshift r b
+  putStrLn "hello"
+
+config_file home_dir = home_dir ++ "/.redshift-mem"
+
+l_to_toup [x,y] = (x,y)
+
+redshift r b = readProcess "redshift" ["-O", show r, "-b", show b] ""
+
+parse r b ["-w"] = (r + red_step, b)
+parse r b ["-r"] = (r - red_step, b)
+parse r b ["-b"] = (r, b + bright_step)
+parse r b ["-d"] = (r, b - bright_step)
+parse r b []     = (r, b)
+
+exit    = exitWith ExitSuccess

@@ -4,7 +4,6 @@
 message="Your time is up!"
 imessage="Go"
 prompt=""
-repeat=false
 
 espeakargs=""
 
@@ -38,12 +37,15 @@ help_message() {
   echo "  --help: Display this message."
 }
 
+repeat=false
+verbose=false
+warn=false
 while test $# -gt 0
 do
   case "$1" in
     --help) help_message; exit 0
       ;;
-    -w|--wait) wait_on_exit="T"
+    -w|--wait) wait_on_exit=true
       ;;
     --em) message=$2; shift
       ;;
@@ -57,11 +59,13 @@ do
       ;;
     -e|--espeakargs) espeakargs=$2; shift
       ;;
-    -v|--verbose) verbose=1;
+    -v|--verbose) verbose=true
       ;;
     -t|--text) text="$2"": "; shift
       ;;
-    -r|--repeat) repeat=true;
+    -r|--repeat) repeat=true
+      ;;
+    --warn) warn=true
       ;;
     -*) echo "Bad option $1"; exit 1
       ;;
@@ -76,11 +80,10 @@ if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
   exit 1
 fi
 
-
 if [ ! -z $(command -v espeak) ]; then
   function speak_cmd {
      amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
-     [ verbose = 1 ] && echo "espeak $espeakargs $1"
+     $verbose && echo "espeak $espeakargs $1"
      espeak $espeakargs "$1"
      amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
    }
@@ -92,9 +95,6 @@ else
   echo "No tts command found"
   exit 1
 fi
-
-[ verbose = 1 ] && echo "speak command: $speak_cmd"
-
 
 START_TIME=$(date '+%s')
 END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
@@ -109,6 +109,15 @@ while true; do
       sec_remaining="$(($sec_remaining-1))"
       echo -ne "\r\033[K"$text$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
       [[ "$sec_remaining" -le 0 ]] && break
+      if $warn; then
+        for t in 30 60 120 240 600 900 1800; do
+          if [ t = 30 -o t = 60 ]; then
+            espeak "$t seconds remaining"
+            break
+          fi
+          [[ "$sec_remaining" == $t ]] && espeak "$((t / 60)) minutes remaining"
+        done
+      fi
       ans=""
       if read -n1 -t1 -s ans; then
         printf " <> pause"
