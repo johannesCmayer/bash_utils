@@ -10,7 +10,7 @@ meditation_time=5
 init_wait=15
 
 function alarm-timer {
-    if $debug; then
+    if $no_timer; then
         echo "skipping timer"
     else
         command alarm-timer --im "" --em "" "$@"
@@ -19,18 +19,25 @@ function alarm-timer {
 
 function espeak {
     echo "$@"
-    command espeak -a 50 "$@"
+    if ! $no_voice; then
+        command espeak -a 50 "$@"
+    fi
 }
 
-debug=false
+no_timer=false
+no_voice=false
 while [ $# -gt 0 ]; do
-    case $@ in
-        --debug)
-            debug=true
+    case $1 in
+        --no-timer)
+            no_timer=true
             shift
             ;;
+	--no-voice)
+            no_voice=true
+	    shift
+	    ;;
         *)
-            echo "invalid arg"
+            echo "invalid arg $1"
             exit 1
             ;;
     esac
@@ -59,9 +66,9 @@ while true; do
         m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
         espeak "$m" -s 130
         espeak "Are you sleeping"
-        sleep 1
+        alarm-timer 1 --im "" --em ""
         espeak "Are you sleeping?" -s 150
-        sleep 2
+        alarm-timer 2 --im "" --em ""
         espeak "Are you sleeping?" -s 100
     fi
 
@@ -70,8 +77,8 @@ while true; do
     fi
 
     if [ $i -ge 6 ]; then
-        mpv --vo=null $music_wakeup --volume 55
-        mpv --vo=null $music_wakeup --volume 100
+        mpv --vo=null --shuffle $music_wakeup --volume 55
+        mpv --vo=null --shuffle $music_wakeup --volume 100
     fi
 
     alarm-timer -m 90
