@@ -5,6 +5,7 @@
 # while applying a lucid dreaming technique. It also serves as a wakeup alarm clock.
 
 music1=$HOME/music/*Netgame*
+music_wakeup=$HOME/music/*
 meditation_time=5
 init_wait=15
 
@@ -66,17 +67,13 @@ while true; do
 
     if [ $i -ge 4 -a $i -le 6  ]; then
         mpv --vo=null $music1 --end 11.5 --volume 50
-	echo "NO MUSIC"
     fi
 
     if [ $i -ge 6 ]; then
-        for _ in $(seq 5); do
-            mpv --vo=null $music1 --volume 55
-            mpv --vo=null $music1 --volume 100
-            sleep 3
-        done
+        mpv --vo=null $music_wakeup --volume 55
+        mpv --vo=null $music_wakeup --volume 100
     fi
 
-    alarm-timer -m 80
+    alarm-timer -m 90
     i=$(($i + 1))
 done
