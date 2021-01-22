@@ -62,30 +62,37 @@ alarm-timer -m "$init_wait"
 
 i=0
 while true; do
-    if [ $i -ge 4 ]; then
+    if [ $i -ge 6 ]; then
         m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
         espeak "$m" -s 130
     fi
 
-    if [ $i -ge 2 -a $i -le 3 -o $i -eq 5  ]; then
-        mpv --vo=null $music1 --end 11.5 --volume 50
-	espeak "Are you sleeping"
-        alarm-timer 1 --im "" --em ""
-        espeak "Are you sleeping?" -s 150
-        alarm-timer 2 --im "" --em ""
-        espeak "Are you sleeping?" -s 100
-    fi
-
-    if [ $i -eq 4 ]; then
-        for _ in $(seq 6); do
-    	alarm-timer 10 --im "lucid wake. stand up." --em ""
-        done
-        espeak "lay down"
-        alarm-timer 10 --im "" --em ""
-        espeak "lay down"
-    fi
-
     if [ $i -ge 6 ]; then
+        alarm-timer 0 --im "lucid wake. stand up." --em ""
+        alarm-timer 10 --im "lucid wake. stand up." --em ""
+        mpv --vo=null $music1 --volume 45 #--end 11.5
+        espeak "lay down"
+    fi
+
+#    if [ $i -ge 2 -a $i -le 3 -o $i -eq 5  ]; then
+#        mpv --vo=null $music1 --end 11.5 --volume 50
+#	espeak "Are you sleeping"
+#        alarm-timer 1 --im "" --em ""
+#        espeak "Are you sleeping?" -s 150
+#        alarm-timer 2 --im "" --em ""
+#        espeak "Are you sleeping?" -s 100
+#    fi
+#
+#    if [ $i -eq 4 ]; then
+#        for _ in $(seq 6); do
+#    	alarm-timer 10 --im "lucid wake. stand up." --em ""
+#        done
+#        espeak "lay down"
+#        alarm-timer 10 --im "" --em ""
+#        espeak "lay down"
+#    fi
+
+    if [ $i -ge 7 ]; then
         mpv $music_wakeup --vo=null --shuffle --volume 55
         mpv $music_wakeup --vo=null --shuffle --volume 70
         mpv $music_wakeup --vo=null --shuffle --volume 100
