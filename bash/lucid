@@ -5,11 +5,12 @@
 # while applying a lucid dreaming technique. It also serves as a wakeup alarm clock.
 
 music1=$HOME/music/*Netgame*
+music_wakeup=$HOME/music/*
 meditation_time=5
 init_wait=15
 
 function alarm-timer {
-    if $debug; then
+    if $no_timer; then
         echo "skipping timer"
     else
         command alarm-timer --im "" --em "" "$@"
@@ -18,18 +19,25 @@ function alarm-timer {
 
 function espeak {
     echo "$@"
-    command espeak -a 50 "$@"
+    if ! $no_voice; then
+        command espeak -a 50 "$@"
+    fi
 }
 
-debug=false
+no_timer=false
+no_voice=false
 while [ $# -gt 0 ]; do
-    case $@ in
-        --debug)
-            debug=true
+    case $1 in
+        --no-timer)
+            no_timer=true
             shift
             ;;
+	--no-voice)
+            no_voice=true
+	    shift
+	    ;;
         *)
-            echo "invalid arg"
+            echo "invalid arg $1"
             exit 1
             ;;
     esac
@@ -57,29 +65,32 @@ while true; do
     if [ $i -ge 4 ]; then
         m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
         espeak "$m" -s 130
-        espeak "Are you sleeping"
-        sleep 1
+    fi
+
+    if [ $i -ge 2 -a $i -le 3 -o $i -eq 5  ]; then
+        mpv --vo=null $music1 --end 11.5 --volume 50
+	espeak "Are you sleeping"
+        alarm-timer 1 --im "" --em ""
         espeak "Are you sleeping?" -s 150
-        sleep 2
+        alarm-timer 2 --im "" --em ""
         espeak "Are you sleeping?" -s 100
     fi
 
-    if [ $i -ge 4 -a $i -le 6  ]; then
-        mpv --vo=null $music1 --end 11.5 --volume 50
-    fi
-
-    if [ $i = 6 ]; then
-        espeak "Wake up" -s 140
-    fi
-
-    if [ $i -ge 7 ]; then
-        mpv --vo=null $music1 --volume 55
-        for _ in $(seq 5); do
-            espeak "Wake up" -s 140
-            sleep 3
+    if [ $i -eq 4 ]; then
+        for _ in $(seq 6); do
+    	alarm-timer 10 --im "lucid wake. stand up." --em ""
         done
+        espeak "lay down"
+        alarm-timer 10 --im "" --em ""
+        espeak "lay down"
     fi
 
-    alarm-timer -m 80
+    if [ $i -ge 6 ]; then
+        mpv $music_wakeup --vo=null --shuffle --volume 55
+        mpv $music_wakeup --vo=null --shuffle --volume 70
+        mpv $music_wakeup --vo=null --shuffle --volume 100
+    fi
+
+    alarm-timer -m 90
     i=$(($i + 1))
 done
