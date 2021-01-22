@@ -6,6 +6,8 @@
 
 music1=$HOME/music/*Netgame*
 music_wakeup=$HOME/music/*
+rand_song=$(echo $HOME/music/vocaloid | shuf)[0]
+echo $rand_song
 meditation_time=5
 init_wait=15
 
