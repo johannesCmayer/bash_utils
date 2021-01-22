@@ -64,12 +64,12 @@ alarm-timer -m "$init_wait"
 
 i=0
 while true; do
-    if [ $i -ge 6 ]; then
+    if [ $i -eq 6 ]; then
         m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
         espeak "$m" -s 130
     fi
 
-    if [ $i -ge 6 ]; then
+    if [ $i -eq 6 ]; then
         alarm-timer 0 --im "lucid wake. stand up." --em ""
         alarm-timer 10 --im "lucid wake. stand up." --em ""
         mpv --vo=null $music1 --volume 45 #--end 11.5
