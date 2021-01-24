@@ -45,11 +45,31 @@ function krita
   xsetwacom set "$pad_id" button (button-map 7) "key ctrl r"
   xsetwacom set "$pad_id" button (button-map 8) "key ctrl shift a"
 end
+
+function krita-vert
+    xsetwacom set "$pen_id" maptooutput "HEAD-1"
+    set speed 0.6
+    xsetwacom set "$pen_id" area 0 0 (math "31050*$speed") (math "55200*$speed")
+
+    xsetwacom set "$pen_id" button 3 "3"
+
+    xsetwacom set "$pad_id" button (button-map 1) "key ctrl z"
+    xsetwacom set "$pad_id" button (button-map 2) "key ctrl shift z"
+    xsetwacom set "$pad_id" button (button-map 3) "key ctrl c"
+    xsetwacom set "$pad_id" button (button-map 4) "key ctrl v"
+    xsetwacom set "$pad_id" button (button-map 5) "key b"
+    xsetwacom set "$pad_id" button (button-map 6) "key t"
+    xsetwacom set "$pad_id" button (button-map 7) "key ctrl r"
+    xsetwacom set "$pad_id" button (button-map 8) "key ctrl shift a"
+end
+
 switch $argv[1]
   case miro
     miro
   case krita
     krita
+  case krita-vert
+      krita-vert
   case '*'
     echo "invalid config"
 end
