@@ -4,16 +4,48 @@
 # and tries to wake you up between sleep cycles so that you can try to go back to sleep
 # while applying a lucid dreaming technique. It also serves as a wakeup alarm clock.
 
-music1=$HOME/music/*Netgame*
-music_wakeup=$HOME/music/*
-rand_song=${( $($HOME/music/vocaloid | shuf) )[0]}
-echo rand song: $rand_song
 meditation_time=5
 init_wait=15
 
+no_timer=false
+no_voice=false
+while [ $# -gt 0 ]; do
+    case $1 in
+        --no-timer)
+            no_timer=true
+            shift
+            ;;
+	      --no-voice)
+            no_voice=true
+	          shift
+	          ;;
+        *)
+            echo "invalid arg $1"
+            exit 1
+            ;;
+    esac
+done
+
+case $(hostname) in
+    Aqua-X570GX-LX)
+        music_rand=$HOME/data/audio/consume/music/youtube_playlists/vocaloid_mp3/*
+        ;;
+    raspberrypi)
+        net_game=$HOME/music/*Netgame*
+        music_rand=$HOME/music/vocaloid_mp3/*
+        ;;
+    *)
+        echo "Not setup for this machine."
+        exit 1
+esac
+
+function get_rand_song {
+    echo $(ls $music_rand | sort -R | tail -1)
+}
+
 function alarm-timer {
     if $no_timer; then
-        echo "skipping timer"
+        echo "skipping: alarm-timer $@"
     else
         command alarm-timer --im "" --em "" "$@"
     fi
@@ -25,25 +57,6 @@ function espeak {
         command espeak -a 50 "$@"
     fi
 }
-
-no_timer=false
-no_voice=false
-while [ $# -gt 0 ]; do
-    case $1 in
-        --no-timer)
-            no_timer=true
-            shift
-            ;;
-	--no-voice)
-            no_voice=true
-	    shift
-	    ;;
-        *)
-            echo "invalid arg $1"
-            exit 1
-            ;;
-    esac
-done
 
 espeak "start"
 
@@ -70,9 +83,9 @@ while true; do
     fi
 
     if [ $i -eq 5 ]; then
-        alarm-timer 0 --im "lucid wake. stand up." --em ""
-        alarm-timer 10 --im "lucid wake. stand up." --em ""
-        mpv --vo=null $music1 --volume 45 #--end 11.5
+        alarm-timer 0 --im "lucid wake. stand up."
+        alarm-timer 10 --im "lucid wake. stand up."
+        mpv --vo=null "$(get_rand_song)" --volume 40 #--end 11.5
         espeak "lay down"
     fi
 
@@ -84,7 +97,13 @@ while true; do
     i=$(($i + 1))
 done
 
-espeak "stand up"
-mpv $music_wakeup --vo=null --shuffle --volume 55
-mpv $music_wakeup --vo=null --shuffle --volume 70
-mpv $music_wakeup --vo=null --shuffle --volume 100
+espeak "Wake up"
+
+for vol in 50 75 100; do
+    mpv "$(get_rand_song)" --vo=null --shuffle --volume $vol
+    alarm-timer -m 20 --im "Snoozing for 20 minutes"
+done
+
+espeak "lucid script auto abort"
+
+exit 0
