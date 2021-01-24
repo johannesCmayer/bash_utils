@@ -6,8 +6,8 @@
 
 music1=$HOME/music/*Netgame*
 music_wakeup=$HOME/music/*
-rand_song=$(echo $HOME/music/vocaloid | shuf)[0]
-echo $rand_song
+rand_song=${( $($HOME/music/vocaloid | shuf) )[0]}
+echo rand song: $rand_song
 meditation_time=5
 init_wait=15
 
@@ -64,42 +64,27 @@ alarm-timer -m "$init_wait"
 
 i=0
 while true; do
-    if [ $i -ge 6 ]; then
+    if [ $i -ge 5 ]; then
         m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
         espeak "$m" -s 130
     fi
 
-    if [ $i -ge 6 ]; then
+    if [ $i -eq 5 ]; then
         alarm-timer 0 --im "lucid wake. stand up." --em ""
         alarm-timer 10 --im "lucid wake. stand up." --em ""
         mpv --vo=null $music1 --volume 45 #--end 11.5
         espeak "lay down"
     fi
 
-#    if [ $i -ge 2 -a $i -le 3 -o $i -eq 5  ]; then
-#        mpv --vo=null $music1 --end 11.5 --volume 50
-#	espeak "Are you sleeping"
-#        alarm-timer 1 --im "" --em ""
-#        espeak "Are you sleeping?" -s 150
-#        alarm-timer 2 --im "" --em ""
-#        espeak "Are you sleeping?" -s 100
-#    fi
-#
-#    if [ $i -eq 4 ]; then
-#        for _ in $(seq 6); do
-#    	alarm-timer 10 --im "lucid wake. stand up." --em ""
-#        done
-#        espeak "lay down"
-#        alarm-timer 10 --im "" --em ""
-#        espeak "lay down"
-#    fi
-
     if [ $i -ge 7 ]; then
-        mpv $music_wakeup --vo=null --shuffle --volume 55
-        mpv $music_wakeup --vo=null --shuffle --volume 70
-        mpv $music_wakeup --vo=null --shuffle --volume 100
+        break
     fi
 
     alarm-timer -m 90
     i=$(($i + 1))
 done
+
+espeak "stand up"
+mpv $music_wakeup --vo=null --shuffle --volume 55
+mpv $music_wakeup --vo=null --shuffle --volume 70
+mpv $music_wakeup --vo=null --shuffle --volume 100
