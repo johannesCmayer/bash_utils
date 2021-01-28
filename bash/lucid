@@ -85,7 +85,7 @@ while true; do
     if [ $i -eq 5 ]; then
         alarm-timer 0 --im "lucid wake. stand up."
         alarm-timer 10 --im "lucid wake. stand up."
-        mpv --vo=null "$(get_rand_song)" --volume 40 #--end 11.5
+        mpv --vo=null "$(get_rand_song)" --volume 45 #--end 11.5
         espeak "lay down"
     fi
 
