@@ -7,6 +7,8 @@
 meditation_time=5
 init_wait=15
 
+#trap "echo reseting lightctl before exit; lightctl reset; exit 2" SIGINT
+
 no_timer=false
 no_voice=false
 while [ $# -gt 0 ]; do
@@ -89,6 +91,11 @@ while true; do
         espeak "lay down"
     fi
 
+    if [ $i -eq 6 ]; then
+	echo light f3
+	lightctl f3
+    fi
+
     if [ $i -ge 7 ]; then
         break
     fi
@@ -96,6 +103,10 @@ while true; do
     alarm-timer -m 90
     i=$(($i + 1))
 done
+
+echo lightctl f1
+lightctl f1
+alarm-timer -m 5
 
 espeak "Wake up"
 
