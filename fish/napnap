@@ -1,0 +1,19 @@
+#!/usr/bin/fish
+
+function rnds
+    set -l mdir $HOME/music/vocaloid_mp3
+    set -l a (ls $mdir | sort -R)[1]
+    echo $mdir/$a
+end
+
+trap "kill -INT #1; kill -INT %self" SIGINT
+raspivid -o ~/capture/(date -Is)_napnap.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &;
+
+alarm-timer -m 22; 
+mpv (rnds) --end 10 --volume 60
+alarm-timer -h 1; 
+lightctl f1;
+alarm-timer -m 8 --em "" --im ""
+mpv (rnds)
+kill -INT #1
+
