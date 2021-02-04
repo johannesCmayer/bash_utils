@@ -6,7 +6,7 @@ function rnds
     echo $mdir/$a
 end
 
-trap "kill -INT #1; kill -INT %self" SIGINT
+trap "kill -INT %self" SIGINT
 raspivid -o ~/capture/(date -Is)_napnap.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &;
 
 alarm-timer -m 22; 
