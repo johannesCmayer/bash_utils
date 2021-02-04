@@ -60,7 +60,9 @@ function espeak {
     fi
 }
 
-espeak "start"
+espeak "start recording"
+echo "start recording"
+raspivid -o ~/capture/(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &;
 
 espeak "$meditation_time minute meditation starts in 10 seconds"
 alarm-timer 10
@@ -115,6 +117,6 @@ for vol in 50 75 100; do
     alarm-timer -m 20 --im "Snoozing for 20 minutes"
 done
 
-espeak "lucid script auto abort"
-
-exit 0
+while true
+    read -p "echo send SIGINT to exit"
+end
