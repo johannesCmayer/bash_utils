@@ -134,6 +134,6 @@ for vol in 50 75 100; do
     alarm-timer -m 20 --im "Snoozing for 20 minutes"
 done
 
-while true
+while true; do
     read -p "echo send SIGINT to exit"
-end
+done
