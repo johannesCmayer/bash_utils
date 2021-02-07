@@ -11,16 +11,26 @@ init_wait=15
 
 no_timer=false
 no_voice=false
+skip_into=false
+no_recording=false
 while [ $# -gt 0 ]; do
     case $1 in
         --no-timer)
             no_timer=true
             shift
             ;;
-	      --no-voice)
+        --no-voice)
             no_voice=true
-	          shift
-	          ;;
+            shift
+            ;;
+        --no-recording)
+            no_recording=true
+            shift
+            ;;
+        --skip-intro)
+            skip_intro=true
+            shift
+            ;;
         *)
             echo "invalid arg $1"
             exit 1
@@ -60,21 +70,28 @@ function espeak {
     fi
 }
 
-espeak "start recording"
-echo "start recording"
-raspivid -o ~/capture/(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &;
+if $no_recording; then
+    espeak "no recording"
+else
+    espeak "start recording"
+    raspivid -o ~/capture/$(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &
+fi
 
-espeak "$meditation_time minute meditation starts in 10 seconds"
-alarm-timer 10
-espeak "go"
-alarm-timer -m 5
-espeak "meditation complete"
+if $skip_intro; then
+    espeak "skipping intro"
+else
+    espeak "$meditation_time minute meditation starts in 10 seconds"
+    alarm-timer 10
+    espeak "go"
+    alarm-timer -m 5
+    espeak "meditation complete"
 
-espeak "1 minute lucid mantra"
-alarm-timer -m 1
+    espeak "1 minute lucid mantra"
+    alarm-timer -m 1
 
-espeak "Do reality check"
-alarm-timer 5
+    espeak "Do reality check"
+    alarm-timer 5
+fi
 
 espeak "block one starts in $init_wait minutes"
 alarm-timer -m "$init_wait"
