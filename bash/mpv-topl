@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+    echo need one arg
+    exit 1
+fi
+
+playlist_name=$1
+
+wd=$(echo '{ "command": ["get_property", "working-directory"] }' | socat - /tmp/mpvsocket | jq -r ".data") || exit 1
+song=$(echo '{ "command": ["get_property", "path"] }' | socat - /tmp/mpvsocket | jq -r ".data") || exit 1
+
+if [ ! $wd = $(pwd) ]; then
+    echo "your are not in the same directory as the mpv player"
+    exit 1
+fi
+
+echo "Saving \"$song\" to \"$wd/$playlist_name\""
+echo "$song" >> "$wd/$playlist_name"
+
+exit 0

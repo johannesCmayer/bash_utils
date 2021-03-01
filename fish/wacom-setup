@@ -15,7 +15,6 @@ function button-map
 end
 
 function miro
-  xsetwacom set "$pen_id" maptooutput "HEAD-1"
   xsetwacom set "$pen_id" area 0 0 55200 31050
 
   xsetwacom set "$pen_id" button 3 "3"
@@ -31,7 +30,6 @@ function miro
 end
 
 function krita
-  xsetwacom set "$pen_id" maptooutput "HEAD-1"
   xsetwacom set "$pen_id" area 0 0 55200 31050
 
   xsetwacom set "$pen_id" button 3 "3"
@@ -47,7 +45,6 @@ function krita
 end
 
 function krita-vert
-    xsetwacom set "$pen_id" maptooutput "HEAD-1"
     set speed 0.6
     xsetwacom set "$pen_id" area 0 0 (math "31050*$speed") (math "55200*$speed")
 
@@ -64,7 +61,6 @@ function krita-vert
 end
 
 function SynthV
-    xsetwacom set "$pen_id" maptooutput "HEAD-2"
     xsetwacom set "$pen_id" area 0 0 55200 31050
 
     xsetwacom set "$pen_id" button 3 "3"
@@ -77,6 +73,12 @@ function SynthV
     xsetwacom set "$pad_id" button (button-map 6) "key t"
     xsetwacom set "$pad_id" button (button-map 7) "key ctrl r"
     xsetwacom set "$pad_id" button (button-map 8) "key ctrl shift a"
+end
+
+if [ -z $argv[2] ]
+    xsetwacom set "$pen_id" maptooutput "HEAD-0"
+else
+    xsetwacom set "$pen_id" maptooutput "HEAD-$argv[2]"
 end
 
 if not eval $argv[1]
