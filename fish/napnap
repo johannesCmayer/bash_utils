@@ -8,21 +8,23 @@ end
 
 set short false
 set no_recording false
-switch $argv[1]
-    case --short
-        set short true
-    case --no-recording
-        set no_recording true
-    case '*'
-        echo "Invalid arg"
-        exit 1
+if [ -n "$argv[1]" ]
+    switch $argv[1]
+        case --short
+            set short true
+        case --no-recording
+            set no_recording true
+        case '*'
+            echo "Invalid arg"
+            exit 1
+    end
 end
 
 if eval $no_recording
     espeak "no recording"
 else
     espeak "start recording"
-    raspivid -o ~/capture/$(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &
+    raspivid -o ~/capture/(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &
 end
 
 alarm-timer -m 22; 
