@@ -6,6 +6,7 @@
 
 meditation_time=5
 init_wait=15
+pa_mic="alsa_input.usb-C-Media_Electronics_Inc._USB_Audio_Device-00.analog-mono"
 
 #trap "echo reseting lightctl before exit; lightctl reset; exit 2" SIGINT
 
@@ -73,8 +74,11 @@ function espeak {
 if $no_recording; then
     espeak "no recording"
 else
-    espeak "start recording"
-    raspivid -o ~/capture/$(date -Is)_lucid.avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &
+    espeak "no recording"
+#    espeak "start recording"
+#    rec_base_name=$HOME/capture/$(date +%Y-%m-%dT%H-%M-%S%z)_lucid
+#    raspivid -o "$rec_base_name".avi -w 640 -h 480 -fps 2 -b 40000 -t 0 &
+#    parec -d $pa_mic | lame -r - "$rec_base_name".mp3 &
 fi
 
 if $skip_intro; then
@@ -98,26 +102,26 @@ alarm-timer -m "$init_wait"
 
 i=0
 while true; do
-    if [ $i -ge 5 ]; then
-        m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
-        espeak "$m" -s 130
-    fi
-
+#    if [ $i -ge 5 ]; then
+#        m="block $i over. $((i*90/60)) hours. $(((i*90)%60)) minutes."
+#        espeak "$m" -s 130
+#    fi
+#
     if [ $i -eq 5 ]; then
         alarm-timer 1 --im "lucid wake. stand up."
         alarm-timer 1 --im "lucid wake. stand up."
         mpv --vo=null "$(get_rand_song)" --volume 45
         espeak "lay down"
     fi
-
+#
     if [ $i -eq 6 ]; then
-	echo light f3
-	lightctl f3
+        echo light f3
+        lightctl f3
     fi
-
-    if [ $i -ge 7 ]; then
-        break
-    fi
+#
+#    if [ $i -ge 7 ]; then
+#        break
+#    fi
 
     alarm-timer -m 90
     i=$(($i + 1))
