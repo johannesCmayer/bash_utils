@@ -15,4 +15,4 @@ Suspends the computer for a certain time period, then turns it on again and play
 
 **and much more**
 
-Note that some scripts use absolute file paths, as they reference specific media files to files. These are not usable without modification.
+Note that some number scripts are not designed to be plug-and-play. They use absolute file paths, as they reference specific media files, or are in some other way not usable without modification.
