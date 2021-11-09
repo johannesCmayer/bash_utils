@@ -1,0 +1,16 @@
+#!/usr/bin/fish
+
+if not [ -d lt_5m ] or not [ -d lt_15m ]
+    echo directorie structure incorrect
+    exit 1
+end
+
+for i in *.mp3
+    set length (mediainfo $i --output='Audio;%Duration%')
+    set length (math "$length/60/1000")
+    if [ $length -lt 5 ]
+        mv "$i" lt_5m
+    else if [ $length -lt 15 ]
+        mv "$i" lt_15m
+    end
+end

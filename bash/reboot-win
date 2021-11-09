@@ -1,4 +1,16 @@
 #!/bin/bash
-sudo swapon /swapfile
-sudo grub-reboot "Windows 10 (on /dev/sdd1)"
+
+
+echo switching HDD swap off
+sudo swapoff /dev/disk/by-uuid/34ab87ff-e3f7-4d28-9803-d746e28289dc
+echo switching SSD swap on
+sudo swapon /home/johannes/swapfile
+#sudo grub-reboot "Windows 10 (on /dev/sdd1)"
+set -e
 sudo s2disk -P "shutdown method = reboot"
+
+#echo Waiting 1m
+#sleep 1m
+#
+#echo switching HDD swap on
+#sudo swapon /dev/disk/by-uuid/34ab87ff-e3f7-4d28-9803-d746e28289dc

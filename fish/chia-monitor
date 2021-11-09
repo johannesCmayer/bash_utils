@@ -1,0 +1,20 @@
+#!/usr/bin/fish
+
+while true
+    set -e not_running
+    for i in chia_full_node chia_daemon chia_harvester chia_farmer chia_wallet
+        if not ps -C $i
+            set not_running $i $not_running
+        end
+    end
+
+    if not set -q $not_running
+        set msg "ERROR - $not_running - not running!!!"
+        echo $msg
+        notify-send $msg
+    else
+        set msg "Chia operation check succesfull"
+        echo $msg
+    end
+    sleep 10m
+end

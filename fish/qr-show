@@ -1,0 +1,12 @@
+#!/usr/bin/fish
+
+set save_location /tmp/qr_code_(date -In).png
+
+if not [ (count $argv) = 1 ]
+    echo error
+    exit
+end
+
+qrencode -o $save_location $argv[1] && \
+xdg-open $save_location && \
+rm $save_location

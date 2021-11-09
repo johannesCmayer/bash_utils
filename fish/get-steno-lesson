@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+if not [ (count $argv) = 2 ] 
+    echo usage:
+    echo "  get-steno-lesson WORD_START_IDX WORD_END_IDX"
+    exit 1
+end
+
+sed -n "$argv[1],$argv[2]p" /mnt/data_main/data/org_word_frequencies_no-count_dict_2021-10-12T18:07:59+02:00.txt | xclip

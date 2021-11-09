@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+mad-max-plotter \
+--tmpdir /mnt/firecuda1/chia_plots_tmp_1/ \
+--tmpdir2 /mnt/firecuda1/chia_plots_tmp_2/ \
+--contract xch19fx0207lraffn2fw8eha3z4tymrz87k6a5nv5ujavsq7rl8qakrq8eshlx \
+--farmerkey 86d159ebd990bc64a9de30fabcab30af2011b74d53bea957246c847f92cbe5ea16df7c7e8516d9d2c1f7d558002ec9d9 \
+--threads 9 \
+$argv

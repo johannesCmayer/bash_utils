@@ -1,0 +1,10 @@
+#!/usr/bin/fish
+
+set org_dir /mnt/data_main/org
+
+set x 0
+for f in "$org_dir"/**/*.org "$org_dir"/**/*.org_archive
+  set wc (string split " " (wc -w $f))[1]
+  set x (math "$x+$wc")
+end
+echo $x

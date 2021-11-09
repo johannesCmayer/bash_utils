@@ -76,7 +76,7 @@ function SynthV
 end
 
 if [ -z $argv[2] ]
-    xsetwacom set "$pen_id" maptooutput "HEAD-0"
+    xsetwacom set "$pen_id" maptooutput "HEAD-1"
 else
     xsetwacom set "$pen_id" maptooutput "HEAD-$argv[2]"
 end
@@ -85,13 +85,16 @@ if not eval $argv[1]
     exit 1
 end
 
-# switch $argv[1]
-#   case miro
-#     miro
-#   case krita
-#     krita
-#   case krita-vert
-#       krita-vert
-#   case '*'
-#     echo "invalid config"
-# end
+ switch $argv[1]
+   case miro
+     miro
+   case krita
+     krita
+   case krita-vert
+       krita-vert
+   case SynthV
+       SynthV
+   case '*'
+     echo "invalid config (first argument), possible configs:"
+     echo "mrio, krita, krita-vert, SynthV"
+ end

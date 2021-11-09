@@ -1,0 +1,13 @@
+#!/usr/bin/fish
+
+set org_dir /mnt/data_main/org
+
+for file in "$org_dir"/**/*.org "$org_dir"/**/*.org_archive
+  echo $file
+  tr -d '[:punct:]' < "$file" | tr '[A-Z] ' '[a-z]\n' | sort -u
+end | sed '/^.\{25\}./d' \
+| grep -v -e "http" \
+| sort | uniq -c | sort -g \
+| string trim \
+| tac \
+| tail -n +2
