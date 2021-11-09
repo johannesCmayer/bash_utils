@@ -1,4 +1,4 @@
-# BashUtils
+# Bash Utils
 Some bash utils
 
 ## alarm_timer:
