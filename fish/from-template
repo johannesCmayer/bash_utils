@@ -1,6 +1,6 @@
 #!/usr/bin/fish
 
-set template_dir /home/johannes/data/templates
+set template_dir $HOME/data/templates
 
 switch $argv[1]
   case list
