@@ -1,6 +1,6 @@
 #!/bin/bash
 
 while true; do
-  echo $(date -Is) > /home/johannes/date.txt;
+  echo $(date -Is) > $HOME/date.txt;
   sleep 1;
 done

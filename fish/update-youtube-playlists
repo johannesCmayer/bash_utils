@@ -7,7 +7,7 @@ echo ""
 echo "Start in 5 seconds"
 sleep 5
 
-set playlist_path "/home/johannes/data/rip/music/youtube_playlists"
+set playlist_path "$HOME/data/rip/music/youtube_playlists"
 set archive_name "ytdl-archive.txt"
 echo playlist_path: $playlist_path
 

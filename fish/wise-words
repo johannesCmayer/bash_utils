@@ -4,7 +4,7 @@ amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
 
 switch $argv[1]
   case 1
-    mpv --no-resume-playback -vo=null /home/johannes/data/rip/waking_up/exports/moments/what_where_you_just_about_to_do.mp3
+    mpv --no-resume-playback -vo=null $HOME/data/rip/waking_up/exports/moments/what_where_you_just_about_to_do.mp3
   case 2
     mpv --no-resume-playback --fullscreen "/mnt/data_main/rip/music/youtube_playlists/vocaloid/IA/[MMD] Circus IA-YCuIgd1HOVw.mp4" 
   case 3
