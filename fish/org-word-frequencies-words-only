@@ -1,0 +1,5 @@
+#!/usr/bin/fish
+
+for i in echo (org-word-frequencies)
+    echo (string split " " $i)[2]
+end
