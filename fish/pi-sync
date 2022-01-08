@@ -18,6 +18,10 @@ if [ $argv[1] = "--pi2me" ]
       rsync -a pi@(getip pi):Documents/"$i" $HOME/data/org/pi-file_buffer/
     end
 else if [ $argv[1] = "--me2pi" ]
+    if not [ (read -p 'echo "Are you sure (Y/n): "') = 'Y' ]
+        echo ABORT
+        exit 0
+    end
     for i in bed_notes_pi.org dream_journal_pi.org
       rsync -a $HOME/data/org/pi-file_buffer/"$i" pi@(getip pi):Documents/
     end

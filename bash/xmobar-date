@@ -1,0 +1,4 @@
+#!/bin/bash
+
+LC_TIME=ja_JP.UTF-8
+date '+%a %Y-%m-%d %H:%M'

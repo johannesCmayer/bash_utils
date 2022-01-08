@@ -7,7 +7,7 @@ echo switching SSD swap on
 sudo swapon /home/johannes/swapfile
 #sudo grub-reboot "Windows 10 (on /dev/sdd1)"
 set -e
-sudo s2disk -P "shutdown method = reboot"
+sudo s2disk -P "shutdown method = platform"
 
 #echo Waiting 1m
 #sleep 1m

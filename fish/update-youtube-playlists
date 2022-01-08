@@ -27,24 +27,29 @@ function dl
     cd "$playlist_path"; or exit 1
 end
 
-dl vocaloid "https://www.youtube.com/watch?v=KNrdGx69pCo&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=2&t=0s"
+dl vocaloid "https://www.youtube.com/watch?v=KNrdGx69pCo&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=1"
 dl vocaloid "https://www.youtube.com/watch?v=I25Cqlr5_Sc&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=201"
+dl vocaloid "https://www.youtube.com/watch?v=I25Cqlr5_Sc&list=PLarKqD2Ythc4Wh_ETshDDv4auOg0-gu6C&index=401"
 
 dl mmd_cover "https://www.youtube.com/watch?v=7ENR8Kvw1sk&list=PLarKqD2Ythc4Cz_Bf58xIldoOg1UziGPm"
 dl mmd_anaglyph "https://www.youtube.com/watch?v=9QblfFiN96Q&list=PLarKqD2Ythc70Ni6HFSHQvx_C5-HXkXeP"
 dl good_ia_model "https://www.youtube.com/watch?v=XqHmY95kngw&list=PLarKqD2Ythc64N6_33GsvzDXTTf9anrSP&index=1"
 
+dl vtm "https://www.youtube.com/watch?v=Lq9eqHDKJPE&list=PLarKqD2Ythc4wU0-Ws52HKfjQECgoegGX&index=4"
+
+dl japanese_music "https://www.youtube.com/watch?v=Q7-va0hr3aY&list=PLarKqD2Ythc6DoDK0_1vLcDScMvWMymsR" 
+
+dl dance_moves "https://www.youtube.com/watch?v=v65h-2uPBPQ&list=PLarKqD2Ythc6n_Z8SFLcpC7UFfNgiUbJ1&index=2&t=0s"
+
 dl dance "https://www.youtube.com/watch?v=ir6nk2zrMG0&list=PLarKqD2Ythc61dzfv6ZQKzrPGmVOyVWXO&index=2&t=0s"
 dl dance "https://www.youtube.com/watch?v=V_6gGWEQzdo&list=PLarKqD2Ythc61dzfv6ZQKzrPGmVOyVWXO&index=201"
 
-dl dance_moves "https://www.youtube.com/watch?v=v65h-2uPBPQ&list=PLarKqD2Ythc6n_Z8SFLcpC7UFfNgiUbJ1&index=2&t=0s"
 dl ミク "https://www.youtube.com/watch?v=QJqVZw-mmhs&list=PLarKqD2Ythc5jpoHk_8EW_jYwtCDBJ3E8&index=1"
 dl "ミク、コンサート" "https://www.youtube.com/watch?v=vtZQ0DYgjdE&list=PLarKqD2Ythc6n6iucr9iGAH7wW42g22cH&index=2&t=1662s"
 dl イア "https://www.youtube.com/watch?v=pdenALKNA8w&list=PLarKqD2Ythc6iuoUn_8YVk_eBZJEDMAit&index=1"
 dl rap_beats "https://www.youtube.com/watch?v=ReF6iQ7M5_A&list=PLarKqD2Ythc7F7KxBNHGbcHu-bVNUncNd&index=1"
 dl リン "https://www.youtube.com/watch?v=9LABbFTQfXs&list=PLarKqD2Ythc77x5M1L5iMk-6lEIdwYdON&index=1"
 dl オネ "https://www.youtube.com/playlist?list=PLarKqD2Ythc7dFGdfN6FGXvN0CZ18QxCM"
-dl japanese_music "https://www.youtube.com/watch?v=Q7-va0hr3aY&list=PLarKqD2Ythc6DoDK0_1vLcDScMvWMymsR" 
 
 echo "Fails in:"
 for i in $fails

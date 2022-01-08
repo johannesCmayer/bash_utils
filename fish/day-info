@@ -8,12 +8,6 @@ function red
     echo '<fc=#FF0000>'$argv'</fc>'
 end
 
-if [ (date +%H:%M) = '17:30' ]
-    flash-primary-screen 1
-    sleep 5
-    flash-primary-screen 10
-end
-
 if [ (date +%H) -lt 17 ] || [ (date +%H) -lt 18 -a (date +%M) -lt 30 ]
     set F1 (red "Prim")
 else

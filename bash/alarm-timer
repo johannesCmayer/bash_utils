@@ -83,10 +83,15 @@ fi
 if [ ! -z $(command -v espeak) ]; then
   function speak_cmd {
      amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
-     $verbose && echo "espeak $espeakargs $1"
-     espeak $espeakargs "$1"
+     gsay "$1"
      amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
    }
+#  function speak_cmd {
+#     amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
+#     $verbose && echo "espeak $espeakargs $1"
+#     espeak $espeakargs "$1"
+#     amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
+#   }
 elif [ ! -z $(command -v say) ]; then
   function speak_cmd {
     "say" $1
