@@ -7,27 +7,35 @@ tulpa () {
     [ NO_HIGH_VOLUME ] || set_volume $loud_volume
 
     if [ $SHORT ]; then
+        t=5;
+        alarm-timer -m $t --im "$t minute tulpa training"
         toggl start -o tulpa_training
-        alarm-timer -m 5 --im "5 mitute tulpa training"
     else
+        t=5;
+        start_delay=20
+        alarm-timer --im "starting meditation in $start_delay seconds" --em "" $start_delay
+        alarm-timer 1 --em "$t minute meditation"
         toggl start -o 瞑想
-        alarm-timer -m 5
+        alarm-timer -m $t
         toggl start -o tulpa_training
-        alarm-timer -m 5 --im "talk out loud"
-        alarm-timer -m 5 --im "caitlyn"
-        alarm-timer -m 5 --im "adventure"
+        alarm-timer -m $t --im "$t minutes talking out loud"
+        alarm-timer -m $t --im "$t minutes about caitlyn"
+        alarm-timer -m $t --im "$t minute adventure"
     fi
 }
 
 prophantasia () {
     echo "Prophantasia training"
+    alarm-timer --im "Prophantasia training" 1
     [ NO_HIGH_VOLUME ] || set_volume $loud_volume
     toggl start -o imposition_training
 
     if [ $SHORT ]; then
-        alarm-timer -m 5 --im ""
+        t=5
+        alarm-timer -m $t --im "$t minutes prophantasia"
     else
-        alarm-timer -m 10 --im prophantasia
+        t=10
+        alarm-timer -m $t --im "$t minutes prophantasia"
     fi
 }
 
@@ -40,9 +48,11 @@ meditation () {
     autoclicker 1 0 1
 
     if [ $SHORT ]; then
-        alarm-timer -m 12 --im ""
+        t=12
+        alarm-timer -m $t --im "$t minute meditation"
     else
-        alarm-timer -m 25 --im ""
+        t=25
+        alarm-timer -m $t --im "$t minute meditation"
     fi
 }
 
