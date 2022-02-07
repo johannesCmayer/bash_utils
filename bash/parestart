@@ -1,0 +1,8 @@
+#!/bin/bash
+
+pulseaudio -k; 
+sleep 1; 
+pulseaudio -D;
+sleep 1;
+#pactl set-default-source "mic_mix.monitor"
+pactl set-default-sink "mic_mix_sink"

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+activity_indicator="▼ "
+
+echo $1
+
+if [ "$1" = "--hide-activity" ]; then
+    activity_indicator=""
+elif [ "$1" != "" ]; then
+    echo Invalid argument
+    exit 1
+fi
+
+orig_p=$(cat ~/current_toggl_project.txt)
+orig_d=$(cat ~/current_toggl_description.txt)
+
+echo "$activity_indicator$orig_p" > ~/current_toggl_project.txt
+echo "$activity_indicator$orig_d" > ~/current_toggl_description.txt
+
+o=$(toggl now)
+a=$(echo "$o"| grep Project: | sed 's/Project: //g' | sed 's/ (#[[:digit:]]*)//g')
+b=$(echo "$o" | head -n 1 | sed 's/Project: //g' | sed 's/ #[[:digit:]]*//g')
+
+if [ "$activity_indicator$orig_p" = "$(cat ~/current_toggl_project.txt)" \
+    -a "$activity_indicator$orig_d" = "$(cat ~/current_toggl_description.txt)" ]; then
+    echo $a > ~/current_toggl_project.txt
+    echo $b > ~/current_toggl_description.txt
+    echo $a \| $b
+else
+    echo "Files changed not updating"
+fi

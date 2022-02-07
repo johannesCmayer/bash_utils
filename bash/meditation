@@ -1,0 +1,21 @@
+#!/bin/bash
+start_delay=20
+
+reset_vol () {
+    pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $orig_vol
+    exit 0
+}
+
+orig_vol=$(get-volume)
+
+trap reset_vol INT
+trap reset_vol EXIT
+
+pactl set-source-volume alsa_input.pci-0000_0a_00.4.analog-stereo 32%
+
+# ===================
+
+toggl start -o 瞑想
+alarm-timer --im "starting in $start_delay seconds" --em "" $start_delay
+autoclicker 1 0 1
+alarm-timer -m 25 --im ""

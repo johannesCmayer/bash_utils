@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while true; do
+    update-toggl-current-files --hide-activity
+    sleep 20
+done

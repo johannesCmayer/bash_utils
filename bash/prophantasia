@@ -1,0 +1,18 @@
+#!/bin/bash
+
+reset_vol () {
+    pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $orig_vol
+    exit 0
+}
+
+orig_vol=$(get-volume)
+
+trap reset_vol INT
+trap reset_vol EXIT
+
+pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo 80%
+
+# ===================
+
+toggl start -o imposition_training
+alarm-timer -m 10 --im prophantasia
