@@ -1,6 +1,13 @@
 #!/bin/bash
 
+end () {
+ echo ""
+ exit 0
+}
+
+trap end SIGINT
+
 date1=`date +%s`; while true; do 
-   echo -ne "$(date -u --date @$((`date +%s` - $date1)) +%H:%M:%S)\r";
+   echo -ne "\r$(date -u --date @$((`date +%s` - $date1)) +%H:%M:%S)";
    sleep 0.2
 done
