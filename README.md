@@ -13,6 +13,6 @@ Wrapper for the shutdown_and_restart to add logging capabilities.
 ## shutdown_and_restart
 Suspends the computer for a certain time period, then turns it on again and plays some music. RTC alarm needs to be enabled in the BIOS/UEFI for this to work.
 
-**And much more.**
+## And much more.
 
 Note that some number scripts are not designed to be plug-and-play. They use absolute file paths, as they reference specific media files, or are in some other way not usable without modification.
