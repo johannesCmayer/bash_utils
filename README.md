@@ -1,2 +1,2 @@
-# Bash Utils
-A collection of small programs I wrote.
+# ShellyUtil
+A Collection of small shell programs.
