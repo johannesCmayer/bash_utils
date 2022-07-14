@@ -50,7 +50,7 @@ end
 function inkscape
     basic_setup
     xsetwacom set "$pad_id" button (button-map 5) "key esc key p"        # draw freehand line
-    xsetwacom set "$pad_id" button (button-map 6) "key esc key shift e"  # eraser
+    xsetwacom set "$pad_id" button (button-map 6) "key del"
     xsetwacom set "$pad_id" button (button-map 7) "key esc key t"        # text
     xsetwacom set "$pad_id" button (button-map 8) "key esc key s"        # selection tool
 end

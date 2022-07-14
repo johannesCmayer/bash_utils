@@ -1,0 +1,19 @@
+#!/usr/bin/fish
+
+function green
+    echo '<fc=#00ff15>'$argv'</fc>'
+end
+
+function red
+    echo '<fc=#FF0000>'$argv'</fc>'
+end
+
+set a (echo "" | dmenu -p "Toggl description: ") | string join
+echo ▲ $a > /home/johannes/current_toggl_description.txt
+
+if toggl now -d $a
+    echo $a > /home/johannes/current_toggl_description.txt
+else 
+    echo (red ERROR) > /home/johannes/current_toggl_description.txt
+end
+ 

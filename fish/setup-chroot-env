@@ -1,0 +1,26 @@
+#!/usr/bin/fish
+
+echo This script is WIP and not working.
+exit 0
+
+for j in bash ls touch rm mkdir chmod printf read getopt cat md5sum tail grep
+  set j (which $j)
+  cp -v --parents $j .
+  for i in (ldd $j | egrep -o '/lib.*\.[0-9]')
+      cp -v --parents "$i" .
+  end
+end
+
+mkdir dev
+touch dev/null
+
+# Install conda
+if not [ -f Miniconda3-py39_4.12.0-Linux-x86_64.sh ]
+    wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
+end
+
+function ex
+sudo chroot . $argv
+end
+
+ex bash Miniconda3-py39_4.12.0-Linux-x86_64.sh

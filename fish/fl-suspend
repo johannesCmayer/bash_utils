@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+while true
+    if file-locker check ANY
+        systemctl suspend
+    end
+    echo "Delaying shutdown. File locks active" (file-locker show)
+    sleep 5m
+end

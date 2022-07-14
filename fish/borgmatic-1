@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd "$HOME/.config/borgmatic"
+ssh-add ~/.ssh/master-key
+/home/johannes/miniconda3/bin/borgmatic --log-file /home/johannes/borgmatic.log --log-file-verbosity 2 -v 1 "$@"

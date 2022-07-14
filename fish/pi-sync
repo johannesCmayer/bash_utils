@@ -16,6 +16,10 @@ end
 if [ $argv[1] = "--pi2me" ]
     for i in bed_notes_pi.org dream_journal_pi.org
       rsync -a pi@(getip pi):Documents/"$i" $HOME/data/org/pi-file_buffer/
+      rsync -a --delete pi@(getip pi):.config $HOME/config_backup/pi-1
+      cd $HOME/config_backup
+      git add .
+      git commit -m 'pi config backup'
     end
 else if [ $argv[1] = "--me2pi" ]
     if not [ (read -p 'echo "Are you sure (Y/n): "') = 'Y' ]

@@ -1,0 +1,10 @@
+#!/usr/bin/fish
+
+set -l file_info (gphoto2 --list-files | tail -n 1)
+set -l file_idx (echo $file_info | awk '{print $1}' | sed -s 's/#//g')
+echo getting $file_idx
+gphoto2 --get-file $file_idx
+
+set -l file_name (echo $file_info | awk '{print $2}')
+echo opening $file_name
+nohup krita $file_name &

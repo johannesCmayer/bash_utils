@@ -1,10 +1,10 @@
 #!/bin/bash
 
-loud_volume=70%
+loud_volume=80%
 
 tulpa () {
     echo "Tulpa training"
-    [ $NO_HIGH_VOLUME ] || set_volume $loud_volume
+    [ NO_HIGH_VOLUME ] || set_volume $loud_volume
 
     if [ $SHORT ]; then
         t=5;
@@ -12,36 +12,31 @@ tulpa () {
         alarm-timer -m $t --im "$t minute tulpa training"
     else
         t=5;
+        start_delay=20
+        alarm-timer --im "starting meditation in $start_delay seconds" --em "" $start_delay
+        alarm-timer 1 --em "$t minute meditation"
+        toggl start -o 瞑想
+        alarm-timer -m $t
         toggl start -o tulpa_training
         alarm-timer -m $t --im "$t minutes talking out loud"
-        alarm-timer -m $t --im "$t minutes with caitlyn and Vanders"
+        alarm-timer -m $t --im "$t minutes about caitlyn"
         alarm-timer -m $t --im "$t minute adventure"
     fi
-    reset_vol
 }
 
 prophantasia () {
     echo "Prophantasia training"
-    [ $NO_HIGH_VOLUME ] || set_volume $loud_volume
+    alarm-timer --im "Prophantasia training" 1
+    [ NO_HIGH_VOLUME ] || set_volume $loud_volume
     toggl start -o imposition_training
 
     if [ $SHORT ]; then
         t=5
         alarm-timer -m $t --im "$t minutes prophantasia"
     else
-        t=5
-        alarm-timer -m $t --im "$t minutes image streaming"
+        t=10
         alarm-timer -m $t --im "$t minutes prophantasia"
     fi
-    reset_vol
-}
-
-premeditation () {
-        start_delay=20
-        toggl start -o 瞑想
-        alarm-timer --im "starting meditation in $start_delay seconds" --em "" $start_delay
-        alarm-timer 1 --im "$t minute meditation" --em ""
-        alarm-timer -m $t
 }
 
 meditation () {
@@ -50,45 +45,39 @@ meditation () {
     set_volume 32%
     toggl start -o 瞑想
     alarm-timer --im "starting meditation in $start_delay seconds" --em "" $start_delay
+    autoclicker 1 0 1
 
     if [ $SHORT ]; then
         t=12
-        alarm-timer --im "$t minute meditation" --em "" 1
-        autoclicker 1 0 1
-        alarm-timer -m $t --im ""
+        alarm-timer -m $t --im "$t minute meditation"
     else
-        t=20
-        alarm-timer --im "$t minute daily meditation" --em "" 1
-        autoclicker 1 0 1
-        alarm-timer -m $t --im ""
-
-        #t=20
-        #alarm-timer --im "$t minute free meditation. Setup now." --em "" 1
-        #alarm-timer -m $t --im ""
+        t=25
+        alarm-timer -m $t --im "$t minute meditation"
     fi
-    reset_vol
 }
 
 # ==================
 
 set_volume () {
-    new_volume=$1
+    volume=$1
+    reset_vol () {
+        pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $orig_vol
+        exit 0
+    }
+
     orig_vol=$(get-volume)
-    pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $new_volume
-}
 
-reset_vol () {
-    pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $orig_vol
-}
+    trap reset_vol INT
+    trap reset_vol EXIT
 
-trap reset_vol INT
-trap reset_vol EXIT
+    pactl set-sink-volume alsa_output.pci-0000_0a_00.4.analog-stereo $volume
+}
 
 # ===================
 
 if ! args=$(getopt --name $(basename $0) \
         -o hvstmp \
-        --longoptions help,no-high-volume,short,tulpa,meditation,prophantasia,premeditation \
+        --longoptions help,no-high-volume,short,tulpa,meditation,prophantasia \
         -- "$@"); then
      exit 1
 fi
@@ -107,7 +96,6 @@ for arg in $args; do
             echo '-t | --tulpa)            Tulpa training.'
             echo '-p | --prophantasia)     Prophantasia training.'
             echo '-m | --meditation)       Start a Meditation.'
-            echo '--premeditation)         Start a short Meditation.'
             echo '-v | --no-high-volume)   Do not change volume before starting for high volumes.'
             echo '-s | --short)            Do the short version of the activities.'
             echo '-h | --help)             Show this message.'
@@ -124,11 +112,9 @@ for arg in $args; do
         -m | --meditation)
             meditation
             ;;
-        --premeditation)
-            premeditation
-            ;;
         -p | --prophantasia)
             prophantasia
             ;;
     esac
 done
+

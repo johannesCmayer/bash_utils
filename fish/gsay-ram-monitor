@@ -1,0 +1,19 @@
+#!/usr/bin/fish
+
+while true
+    sleep 1
+    set usage (free | grep Mem | awk '{print $3/$2 * 100.0}' | awk -F. '{print $1}')
+    if [ "$usage" -ge 90 ]
+        set msg "memory usage $usage percent"
+        echo $msg
+
+        set o_vol (echo (pulsemixer --get-volume) | cut -d" " -f1)
+        amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
+        pactl -- set-sink-volume 0 65%
+        gsay $msg
+        pactl -- set-sink-volume 0 "$o_vol"%
+        amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
+
+        sleep 10
+    end
+end

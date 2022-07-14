@@ -21,7 +21,7 @@ function dl
     if [ ! -f $archive_name ]
       touch ytdl-archive.txt
     end
-    if not youtube-dl --ignore-errors "$playlisturl" --download-archive $archive_name
+    if not yt-dlp --ignore-errors "$playlisturl" --download-archive $archive_name -f 'bestvideo[height<=1080]+bestaudio/best[height<=1080]'
         set fails $fails "$directory"
     end
     cd "$playlist_path"; or exit 1

@@ -1,0 +1,59 @@
+#!/usr/bin/fish
+
+set allowed_websites "toggl.com" "track.toggl.com" "calendar.google.com" "calendar.google.com" "app.wakingup.com"
+
+function setup ()
+    sudo iptables --new-chain EVENING_BLOCK
+    for i in $allowed_websites
+        sudo iptables -A EVENING_BLOCK -p tcp --dport 80 -m string --string "$i" --algo kmp -j ACCEPT
+        sudo iptables -A EVENING_BLOCK -p tcp --dport 443 -m string --string "$i" --algo kmp -j ACCEPT
+    end
+    sudo iptables -A EVENING_BLOCK -p tcp --dport 80 -m string --string "*" --algo kmp -j REJECT
+    sudo iptables -A EVENING_BLOCK -p tcp --dport 443 -m string --string "*" --algo kmp -j REJECT
+end
+
+function setup2 ()
+    for i in $allowed_websites
+        sudo iptables -A OUTPUT -p tcp --dport 80 -m string --string "$i" --algo kmp -j ACCEPT
+        sudo iptables -A OUTPUT -p tcp --dport 443 -m string --string "$i" --algo kmp -j ACCEPT
+    end
+    sudo iptables -A OUTPUT -p tcp --dport 80 -m string --string "*" --algo kmp -j REJECT
+    sudo iptables -A OUTPUT -p tcp --dport 443 -m string --string "*" --algo kmp -j REJECT
+end
+
+function setup3 ()
+    for i in $allowed_websites
+        sudo iptables -A OUTPUT -p tcp -m string --string "$i" --algo kmp -j ACCEPT
+        sudo iptables -A OUTPUT -p tcp -m string --string "$i" --algo kmp -j ACCEPT
+    end
+    sudo iptables -A OUTPUT -p tcp -m string --string "*" --algo kmp -j REJECT
+    sudo iptables -A OUTPUT -p tcp -m string --string "*" --algo kmp -j REJECT
+end
+
+function scrap_setup ()
+    sudo iptables --flush EVENING_BLOCK
+    sudo iptables --delete-chain EVENING_BLOCK
+end
+
+function block ()
+    sudo iptables -I OUTPUT --goto EVENING_BLOCK
+end
+
+function unblock ()
+    sudo iptables -D OUTPUT 1
+end
+
+set commands setup scrap_setup block unblock
+
+$argv[1]
+exit 0
+
+if contains $argv[1] $commands
+    $argv[1]
+else
+    echo "Invalid command. Commands:"
+    for i in $commands
+        echo $i
+    end
+end
+
