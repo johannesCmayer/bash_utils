@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+set mount_dir /run/user/1000/gvfs/*/Card
+if not set id (cat "$mount_dir/mtp_id.txt")
+    echo mtp_id file not found.
+    exit 1
+end
+
+rsync -av "$mount_dir/DCIM" ~/mtp/"$id"

@@ -1,21 +1,26 @@
 #!/bin/bash
 
 # Displays
-xrandr --auto
-xrandr --output DVI-D-0 --primary
-xrandr --output HDMI-0 --right-of DVI-D-0
-xrandr --output DP-2 --right-of HDMI-0
+if [ $(hostname) = Aqua ]; then
+  xrandr --auto
+  xrandr --output DVI-D-0 --primary
+  xrandr --output HDMI-0 --right-of DVI-D-0
+  xrandr --output DP-2 --right-of HDMI-0
+fi
 xset dpms $((60 * 10)) $((60 * 30)) $((60 * 45))
 
 # Keyboard
 xset s off
 xset r rate 250 60
 setxkbmap -option compose:ralt
-# Map capslock to escape
+## Map capslock to escape
 setxkbmap -option caps:escape
 
-hsetroot -solid '#09000F'
-nitrogen --restore
+# Misc
+if [ $(hostname) = Aqua ]; then
+  hsetroot -solid '#09000F'
+  nitrogen --restore
+fi
 wacom-setup inkscape
 
 udevadm trigger
