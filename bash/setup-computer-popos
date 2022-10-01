@@ -1,0 +1,72 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo specify the computer name as first argument
+    exit 1
+fi
+
+name="$1"
+
+cd "$HOME"
+
+mkdir ~/bin
+
+# get root
+sudo echo got root
+
+echo generate and install ssh key
+ssh-keygen -f ~/.ssh/"$name"_rsa
+ssh-copy-id -i .ssh/"$name"_rsa batou.ddns.net
+
+echo conda install
+wget 'https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh' -O "~/Downloads/Miniconda3-py39_4.12.0-Linux-x86_64.sh"
+sh 'Downloads/Miniconda3-py39_4.12.0-Linux-x86_64.sh'
+
+echo install my programs
+mkdir ~/software_projects
+git clone git@github.com:johannesCmayer/shell-fish-legs.git ~/software_projects/shell-fish-legs
+cd bin
+ln -s ~/software_projects/shell-fish-legs shell
+ln -s shell/bash/alarm-timer
+ln -s shell/bash/stopwatch
+ln -s shell/bash/cron-git-backup
+ln -s shell/bash/toggle-touchpad
+ln -s shell/fish/wacom-setup
+cd
+
+echo copy my data
+git clonegit@github.com:johannesCmayer/org.git org
+
+echo copy config
+git clone git@github.com:johannesCmayer/.config.git .config
+ln -s .config/spacemacs .spacemacs
+ln -s .config/emacs.d .emacs.d
+
+echo copy secrets
+rsync -a batou.ddns.net:.ssh ~
+rsync -a batou.ddns.net:.gnupg ~
+rsync -a batou.ddns.net:.password-store ~
+
+echo misc install
+sudo apt install -y htop qtqr nemo zathura
+sudo apt install snapd
+sudo snap install yt-dlp
+flatpak install flathub com.discordapp.Discord 
+flatpak install flathub com.slack.Slack
+flatpak install flathub com.brave.Browser
+
+echo Install fish
+sudo apt-add-repository ppa:fish-shell/release-3
+sudo apt update
+sudo apt install fish -y
+
+echo neovim
+sudo apt install neovim -y
+
+echo Install Cuda
+sudo apt install system76-cuda-latest system76-cudnn-11.2 -y
+
+echo configure cron-git-backup
+
+echo REBOOT REQUIRED
+

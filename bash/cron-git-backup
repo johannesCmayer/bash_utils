@@ -1,13 +1,25 @@
 #!/bin/bash
 
-org_path="$HOME/data/org"
+if ! [ -z "$1" ]; then
+    org_path="$1"
+else
+    # Aqua backwards compatability
+    org_path="$HOME/data/org"
+fi
+
+if ! [ -z "$2" ]; then
+    ping_url="$2"
+else
+    # Aqua backwards compatability
+    ping_url='https://hc-ping.com/ce8169be-85e0-4e22-b574-c35f45ae3302'
+fi
 
 ping () {
     val="$1"
     if ! [ -z $val ]; then
         val="/$val"
     fi
-    curl --retry 3 "https://hc-ping.com/ce8169be-85e0-4e22-b574-c35f45ae3302""$val"
+    curl --retry 3 "$ping_url""$val"
 }
 
 backup-org () {
