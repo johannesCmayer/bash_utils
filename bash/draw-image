@@ -1,0 +1,51 @@
+#!/bin/bash
+
+inkscape=inkscape
+path="$HOME"/org/main/svgs
+template=$path/org_template.svg
+
+DEBUG=false
+
+which trash > /dev/null || exit 1
+which $inkscape > /dev/null || exit 1
+which uuidgen > /dev/null || exit 1
+
+db_echo () {
+    if $DEBUG; then
+        echo $@
+    fi
+}
+
+file_name=$(uuidgen)
+
+if [ ! -z "$1" ]; then
+    file_name=$1
+fi
+
+path_svg=$path/$file_name.svg
+path_png=$path/$file_name.png
+
+if [ "$2" = 'delete' ]; then
+    trash "$path_svg"
+    trash "$path_png"
+    exit 0
+fi
+
+if [ -f "$path_svg" ]; then
+    db_echo "file name exsists, opening exsisting"
+else
+    db_echo "creating $path_svg"
+    cp $template $path_svg
+fi
+
+db_echo "opening $path_svg"
+$inkscape $path_svg > /dev/null 2>&1
+
+db_echo "exporting to png"
+$inkscape --export-area-drawing -o $path_png $path_svg >/dev/null 2>&1
+
+echo -n [[$path/$file_name.png]]
+
+# echo "[[$path/$file_name.png]]" | xclip
+# echo "[[$path/$file_name.png]]" | xclip -selection c
+# echo "png path copied to both clipboards"
