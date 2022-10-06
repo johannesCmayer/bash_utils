@@ -1,10 +1,12 @@
 #!/bin/bash
 
 inkscape=inkscape
-path="$HOME"/org/main/svgs
+path="$HOME"/org/.draw_image_data
 template=$path/org_template.svg
 
 DEBUG=false
+
+# ==========
 
 which trash > /dev/null || exit 1
 which $inkscape > /dev/null || exit 1
@@ -28,6 +30,13 @@ path_png=$path/$file_name.png
 if [ "$2" = 'delete' ]; then
     trash "$path_svg"
     trash "$path_png"
+    exit 0
+fi
+
+if [ "$2" = 'update' ]; then
+    db_echo "exporting to png"
+    $inkscape --export-area-drawing -o $path_png $path_svg >/dev/null 2>&1
+    echo -n [[$path/$file_name.png]]
     exit 0
 fi
 

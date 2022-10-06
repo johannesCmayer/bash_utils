@@ -1,5 +1,7 @@
 #!/bin/bash
 
+POPOS=false
+
 if [ -z "$1" ]; then
     echo specify the computer name as first argument
     exit 1
@@ -7,17 +9,17 @@ fi
 
 name="$1"
 
-# cd "$HOME"
-# 
-# mkdir ~/bin
-# 
-# # get root
-# sudo echo got root
-# 
-# echo generate and install ssh key
-# ssh-keygen -f ~/.ssh/"$name"_rsa
-# ssh-copy-id -i .ssh/"$name"_rsa batou.ddns.net
-# 
+cd "$HOME"
+
+mkdir ~/bin
+
+echo get root
+sudo echo got root
+
+#echo generate and install ssh key
+#ssh-keygen -f ~/.ssh/"$name"_rsa
+#ssh-copy-id -i .ssh/"$name"_rsa batou.ddns.net
+
 # echo conda install
 # cd Downloads
 # wget 'https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh' || exit 1
@@ -44,38 +46,45 @@ name="$1"
 #echo copy my data
 #git clone git@github.com:johannesCmayer/org.git org || exit 1
 
-#echo copy config
+echo
+echo ============
+echo copy config
+echo ============
 #git clone git@github.com:johannesCmayer/.config.git /tmp/.config || exit 1
 #rsync -a /tmp/.config/ ~/.config
+#sudo rm -r /tmp/.config
 #ln -s .config/spacemacs .spacemacs || exit 1
 #ln -s .config/emacs.d .emacs.d || exit 1
-#
-#echo copy secrets
+
+echo
+echo ============
+echo copy secrets
+echo ============
 #mkdir ~/.ssh
 #rsync -a batou.ddns.net:.ssh/ ~/.ssh || exit 1
 #mkdir ~/.gnupg
 #rsync -a batou.ddns.net:.gnupg/ ~/.gnupg || exit 1
 #mkdir ~/.password-store
 #rsync -a batou.ddns.net:.password-store/ ~/.password-store || exit 1
-
-echo misc install
-sudo apt install -y htop qtqr nemo zathura gnome-tweaks || exit 1
-sudo apt install -y python3 python-is-python3 python3-pip ipython3 
-pip install yt-dlp jupyterlab || exit 1
+#
+#echo ============
+#echo misc install
+#echo ============
+#sudo apt install -y neovim htop qtqr nemo zathura gnome-tweaks || exit 1
+#sudo apt install -y python3 python-is-python3 python3-pip ipython3 || exit 1
+#pip install yt-dlp jupyterlab || exit 1
+#sudo apt install flatpak
 flatpak install -y flathub com.discordapp.Discord  || exit 1
 flatpak install -y flathub com.slack.Slack || exit 1
 flatpak install -y flathub com.brave.Browser || exit 1
 
+echo
+echo ============
 echo Install fish
+echo ============
 sudo apt-add-repository -y ppa:fish-shell/release-3
 sudo apt update
 sudo apt install fish -y || exit 1
-
-echo neovim
-sudo apt install neovim -y || exit 1
-
-echo Install Cuda
-sudo apt install system76-cuda-latest system76-cudnn-11.2 -y || exit 1
 
 echo configure compose key + CAPS is ESC
 echo configure autostart applications
@@ -89,3 +98,6 @@ echo setup brave, account logins
 
 echo REBOOT REQUIRED
 
+if POPOS; then
+    echo Install Cuda
+    sudo apt install system76-cuda-latest system76-cudnn-11.2 -y || exit 1
