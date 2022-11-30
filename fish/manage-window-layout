@@ -1,0 +1,20 @@
+#!/usr/bin/fish
+
+if [ $argv[1] = "save" ]
+    wmctrl -l > "$HOME"/window_locations.txt
+else if [ $argv[1] = "restore-ids" ]
+    for i in (cat "$HOME"/window_locations.txt | awk '{print "wmctrl -i -r " $1 " -t " $2}')
+        echo $i
+        eval "$i"
+    end
+else if [ $argv[1] = "restore-names" ]
+    set n 1
+    for i in (cat "$HOME"/window_locations.txt | awk '{ s=""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | rev | cut -c2- | rev)
+        set wsid (cat "$HOME"/window_locations.txt | head -$n | tail -1 | awk '{print $2}')
+        echo wmctrl -r "\"$i\"" -t $wsid
+        wmctrl -r "$i" -t "$wsid"
+        set n (math $n+1)
+    end
+else
+    echo error no valid argument.
+end
