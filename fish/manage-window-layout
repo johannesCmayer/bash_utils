@@ -1,20 +1,56 @@
 #!/usr/bin/fish
 
+set SAVE_FILE "$HOME"/window_locations.txt
+
+set n_windows (math (cat "$SAVE_FILE" | awk '{print $2}' | sort -n | tail -1) + 1)
+
+set pids
+
+function saturate
+    for i in (seq $n_windows)
+        echo alacritty &
+        alacritty &
+        echo set pids $pids $last_pid
+        set pids $pids $last_pid
+    end
+    sleep 1
+    for pid in $pids
+        echo set sat_windows $sat_windows (xdotool search --pid $pid)
+        set sat_windows $sat_windows (xdotool search --pid $pid)
+    end
+    for i in (seq $n_windows)
+        echo wmctrl -i -r $sat_windows[$i] -t (math $i-1)
+        wmctrl -i -r $sat_windows[$i] -t (math $i-1)
+    end
+end
+
+function desaturate
+    echo $pids
+    for pid in $pids
+        echo kill $pid
+        kill $pid
+    end
+end
+
 if [ $argv[1] = "save" ]
-    wmctrl -l > "$HOME"/window_locations.txt
+    wmctrl -l > "$SAVE_FILE"
 else if [ $argv[1] = "restore-ids" ]
-    for i in (cat "$HOME"/window_locations.txt | awk '{print "wmctrl -i -r " $1 " -t " $2}')
+    saturate
+    for i in (cat "$SAVE_FILE" | awk '{print "wmctrl -i -r " $1 " -t " $2}')
         echo $i
         eval "$i"
     end
+    desaturate
 else if [ $argv[1] = "restore-names" ]
+    saturate
     set n 1
-    for i in (cat "$HOME"/window_locations.txt | awk '{ s=""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | rev | cut -c2- | rev)
-        set wsid (cat "$HOME"/window_locations.txt | head -$n | tail -1 | awk '{print $2}')
+    for i in (cat "$SAVE_FILE" | awk '{ s=""; for (i = 4; i <= NF; i++) s = s $i " "; print s }' | rev | cut -c2- | rev)
+        set wsid (cat "$SAVE_FILE" | head -$n | tail -1 | awk '{print $2}')
         echo wmctrl -r "\"$i\"" -t $wsid
         wmctrl -r "$i" -t "$wsid"
         set n (math $n+1)
     end
+    desaturate
 else
     echo error no valid argument.
 end
