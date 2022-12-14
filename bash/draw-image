@@ -1,60 +1,93 @@
 #!/bin/bash
 
-inkscape=inkscape
-path="$HOME"/org/.draw_image_data
-template=$path/org_template.svg
+script_path=$(dirname -- "$( readlink -f -- "$0"; )")
+log_path="$( readlink -f -- "$0"; )".log
 
-DEBUG=false
-
-# ==========
-
-which trash > /dev/null || exit 1
-which $inkscape > /dev/null || exit 1
-which uuidgen > /dev/null || exit 1
-
-db_echo () {
-    if $DEBUG; then
-        echo $@
-    fi
+function xopp_export_cmd {
+    in_file="$1"
+    out_file="$2"
+    >&2 flatpak run com.github.xournalpp.xournalpp \
+        --export-no-background --export-no-ruling --create-img="$out_file" "$in_file"
+    mogrify -trim "$out_file"
 }
 
-file_name=$(uuidgen)
+function xopp_draw_cmd {
+    draw_cmd=xournalpp
+    if [ "$(hostname)" = rimuru ]; then
+        draw_cmd='flatpak run com.github.xournalpp.xournalpp'
+    fi
+    >&2 $draw_cmd $@
+}
 
-if [ ! -z "$1" ]; then
-    file_name=$1
-fi
+function draw_cmd {
+    xopp_draw_cmd $@
+}
 
-path_svg=$path/$file_name.svg
-path_png=$path/$file_name.png
+function export_cmd {
+    xopp_export_cmd $@
+}
 
-if [ "$2" = 'delete' ]; then
-    trash "$path_svg"
-    trash "$path_png"
-    exit 0
-fi
+function main {
+    if [ "$1" = 'log' ]; then
+        cat "$log_path"
+        exit 0
+    fi
 
-if [ "$2" = 'update' ]; then
-    db_echo "exporting to png"
-    $inkscape --export-area-drawing -o $path_png $path_svg >/dev/null 2>&1
-    echo -n [[$path/$file_name.png]]
-    exit 0
-fi
+    path="$HOME"/org/.draw_image_data
+    template=$path/template.xopp
 
-if [ -f "$path_svg" ]; then
-    db_echo "file name exsists, opening exsisting"
-else
-    db_echo "creating $path_svg"
-    cp $template $path_svg
-fi
+    DEBUG=false
 
-db_echo "opening $path_svg"
-$inkscape $path_svg > /dev/null 2>&1
+    # ==========
 
-db_echo "exporting to png"
-$inkscape --export-area-drawing -o $path_png $path_svg >/dev/null 2>&1
+    which trash > /dev/null || { echo trash not found; exit 1; }
+    which uuidgen > /dev/null || { echo uuidgen not found; exit 1; }
 
-echo -n [[$path/$file_name.png]]
+    db_echo () {
+        if $DEBUG; then
+            echo $@
+        fi
+    }
 
-# echo "[[$path/$file_name.png]]" | xclip
-# echo "[[$path/$file_name.png]]" | xclip -selection c
-# echo "png path copied to both clipboards"
+    file_name=$(uuidgen)
+
+    if [ ! -z "$1" ]; then
+        >&2 echo setting filename to $1
+        file_name=$1
+    fi
+
+    path_xopp=$path/$(date -Is)_$file_name.xopp
+    path_png=$path/$(date -Is)_$file_name.png
+
+    if [ "$2" = 'delete' ]; then
+        >&2 echo deleting the following: $path_xopp $path_png
+        trash "$path_xopp"
+        trash "$path_png"
+        exit 0
+    fi
+
+    if [ "$2" = 'update' ]; then
+        >&2 echo reexporting: "$path_xopp" to "$path_png"
+        export_cmd "$path_xopp" "$path_png"
+        echo -n [[$path_png]]
+        exit 0
+    fi
+
+    if [ ! -f "$path_xopp" ]; then
+        >&2 echo created: $path_xopp
+        cp "$template" "$path_xopp"
+    fi
+
+    draw_cmd "$path_xopp"
+    export_cmd "$path_xopp" "$path_png"
+    if [ "$(identify "$path_png" | awk '{print $3}')" = '1x1' ]; then
+        >&2 echo No drawing in image. Aborting.
+        rm "$path_xopp"
+        rm "$path_png"
+        exit 0
+    fi
+
+    echo -n [[$path_png]]
+}
+
+main $@ 2> "$log_path"
