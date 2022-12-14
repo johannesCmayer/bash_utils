@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ -z $1 ]; then
+    echo need one arg
+    exit 1
+fi
+
+rating=$1
+
+if ! [ $rating = 0 -o $rating = 1 -o $rating = 4 -o $rating = 9 ]; then
+    echo Rating needs to be 0,1,4, or 9.
+    exit 1
+fi
+
+wd=$(echo '{ "command": ["get_property", "working-directory"] }' | socat - /tmp/mpvsocket | jq -r ".data") || exit 1
+song=$(echo '{ "command": ["get_property", "path"] }' | socat - /tmp/mpvsocket | jq -r ".data") || exit 1
+
+if [ -z "$2" -o "$2" != "--dry" ]; then
+    echo $rating, $song >> "$HOME"/Music/ratings.txt
+fi
+
+echo "Rated as $rating" "$song"
+notify-send "Rated as $rating" "$song"
