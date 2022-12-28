@@ -4,7 +4,8 @@ last_path="$HOME"/last_desktop.txt
 current_path="$HOME"/current_desktop.txt
 
 last=$(cat "$last_path")
-current=$(cat "$current_path")
+#current=$(cat "$current_path")
+current=$(wmctrl -d | grep '*' | awk '{ print $1 }')
 new=$1
 
 if [ $1 = "last" ]; then

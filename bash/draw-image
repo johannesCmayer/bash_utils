@@ -1,22 +1,23 @@
 #!/bin/bash
 
+DEBUG=true
+
 script_path=$(dirname -- "$( readlink -f -- "$0"; )")
 log_path="$( readlink -f -- "$0"; )".log
 
 function xopp_export_cmd {
     in_file="$1"
     out_file="$2"
-    >&2 flatpak run com.github.xournalpp.xournalpp \
-        --export-no-background --export-no-ruling --create-img="$out_file" "$in_file"
+    xournalpp --export-no-background --export-no-ruling --create-img="$out_file" "$in_file" >&2
     mogrify -trim "$out_file"
 }
 
 function xopp_draw_cmd {
     draw_cmd=xournalpp
-    if [ "$(hostname)" = rimuru ]; then
-        draw_cmd='flatpak run com.github.xournalpp.xournalpp'
-    fi
-    >&2 $draw_cmd $@
+    #if [ "$(hostname)" = rimuru ]; then
+    #    draw_cmd='flatpak run com.github.xournalpp.xournalpp'
+    #fi
+    $draw_cmd $@ >&2
 }
 
 function draw_cmd {
@@ -25,6 +26,12 @@ function draw_cmd {
 
 function export_cmd {
     xopp_export_cmd $@
+}
+
+db_echo () {
+    if $DEBUG; then
+        echo $@ >&2
+    fi
 }
 
 function main {
@@ -36,23 +43,15 @@ function main {
     path="$HOME"/org/.draw_image_data
     template=$path/template.xopp
 
-    DEBUG=false
-
     # ==========
 
     which trash > /dev/null || { echo trash not found; exit 1; }
     which uuidgen > /dev/null || { echo uuidgen not found; exit 1; }
 
-    db_echo () {
-        if $DEBUG; then
-            echo $@
-        fi
-    }
-
     file_name=$(uuidgen)
 
     if [ ! -z "$1" ]; then
-        >&2 echo setting filename to $1
+        db_echo "setting filename to $1"
         file_name=$1
     fi
 
@@ -60,28 +59,28 @@ function main {
     path_png=$path/$(date -Is)_$file_name.png
 
     if [ "$2" = 'delete' ]; then
-        >&2 echo deleting the following: $path_xopp $path_png
+        db_echo "deleting the following: $path_xopp $path_png"
         trash "$path_xopp"
         trash "$path_png"
         exit 0
     fi
 
     if [ "$2" = 'update' ]; then
-        >&2 echo reexporting: "$path_xopp" to "$path_png"
+        db_echo "reexporting: "$path_xopp" to "$path_png""
         export_cmd "$path_xopp" "$path_png"
         echo -n [[$path_png]]
         exit 0
     fi
 
     if [ ! -f "$path_xopp" ]; then
-        >&2 echo created: $path_xopp
+        db_echo "created: $path_xopp"
         cp "$template" "$path_xopp"
     fi
 
     draw_cmd "$path_xopp"
     export_cmd "$path_xopp" "$path_png"
     if [ "$(identify "$path_png" | awk '{print $3}')" = '1x1' ]; then
-        >&2 echo No drawing in image. Aborting.
+        db_echo "No drawing in image. Aborting."
         rm "$path_xopp"
         rm "$path_png"
         exit 0
@@ -90,4 +89,5 @@ function main {
     echo -n [[$path_png]]
 }
 
-main $@ 2> "$log_path"
+echo "" > "$log_path"
+main $@ 2>> "$log_path"
