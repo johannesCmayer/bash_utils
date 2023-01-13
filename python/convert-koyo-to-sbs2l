@@ -4,24 +4,32 @@ from subprocess import check_output
 import argparse
 import tempfile
 import os
+import sys
+import time
+from termcolor import cprint
 from pdb import set_trace
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description = "Convert Video files from this playlist https://www.youtube.com/playlist?list=PLYlLZnjQQehAy4M9-DNVZmLN0MfilFMX-\nSpecifically convert them from a 360 video that is composed of 4 diffirent streams that are all packed together in one 16:9 video to a half SBS video. Watch one of the videos to see the format.")
 parser.add_argument('input_file')
 parser.add_argument('--debug', action='store_true')
+parser.add_argument('--conversion_archive', default=None)
 args = parser.parse_args()
+
+input_video_width = check_output(f"mediainfo '{args.input_file}' | grep Width | awk '{{print $3$4}}'", shell = True)
+input_video_width = input_video_width.decode().strip()
+input_video_width = int(input_video_width)
 
 input_video_height = check_output(f"mediainfo '{args.input_file}' | grep Height | awk '{{print $3$4}}'", shell = True)
 input_video_height = input_video_height.decode().strip()
 input_video_height = int(input_video_height)
-if input_video_height != 2160:
-    raise Exception(f"The input video has a height of {input_video_height}. This program expects 4k video, and does not currently support other resolutions.")
+
+if input_video_height != 2160 or input_video_width != 3840:
+    cprint(f"WRONG DIMENSIONS. The input video {args.input_file} has dimension {input_video_width}x{input_video_height}. This program supports only 3840x2160.", color='red')
+    exit(1)
 
 extra_args = ""
 if args.debug:
     extra_args = "-to 10"
-
-print(os.getcwd())
 
 # The aspect ratio is not 16 to 9, so we want to crop away some of the sides
 width_for_16_by_9 = 960 * 16/9
@@ -29,12 +37,30 @@ cutoff_per_side = (2160 - width_for_16_by_9) / 2
 first_column = cutoff_per_side 
 last_column = 2160 - cutoff_per_side
 
-out_file_name = f"{os.path.splitext(args.input_file)[0]}_SBS.mp4"
+out_file_name = f"{os.path.splitext(os.path.basename(args.input_file))[0]}_SBS.mp4"
 if args.debug:
     out_file_name = f"DEBUG_{out_file_name}"
 
+print("out file:", out_file_name)
+
+if args.conversion_archive:
+    if not os.path.isfile(args.conversion_archive):
+        with open(args.conversion_archive, 'w'):
+            pass
+    with open(args.conversion_archive, 'r') as f:
+        for line in f.readlines():
+            if line.strip() == out_file_name.strip():
+                print(f"File {out_file_name} found in conversion archive", file=sys.stderr)
+                exit(0)
+
+#extra_args += " -c:a copy"
+
 with tempfile.TemporaryDirectory() as temp_dir:
-    check_output(f"ffmpeg -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:0'    {extra_args} '{temp_dir}'/1.mp4", shell=True)
-    check_output(f"ffmpeg -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:1920' {extra_args} '{temp_dir}'/2.mp4", shell=True)
-    check_output(f"ffmpeg -i '{temp_dir}'/1.mp4 -i '{temp_dir}'/2.mp4 -filter_complex hstack '{temp_dir}'/3.mp4", shell=True)
-    check_output(f"ffmpeg -i '{temp_dir}'/3.mp4 -vf 'scale=1920x1080' -aspect 16:9 '{out_file_name}'", shell=True)
+    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:0'    {extra_args} '{temp_dir}'/1.mp4", shell=True)
+    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:1920' {extra_args} '{temp_dir}'/2.mp4", shell=True)
+    check_output(f"ffmpeg -y -i '{temp_dir}'/1.mp4 -i '{temp_dir}'/2.mp4 -filter_complex hstack '{temp_dir}'/3.mp4", shell=True)
+    check_output(f"ffmpeg -y -i '{temp_dir}'/3.mp4 -vf 'scale=1920x1080' -aspect 16:9 '{out_file_name}'", shell=True)
+
+if args.conversion_archive:
+    with open(args.conversion_archive, 'a') as f:
+        f.write(f"{out_file_name}\n")
