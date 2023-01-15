@@ -8,6 +8,10 @@ import sys
 import time
 from termcolor import cprint
 from pdb import set_trace
+import platform
+
+if platform.system() != "Linux":
+    cprint("WARNING: This program runs a shell, and uses pipes to calculate the image dimensions. This has only been tested on Linux and likey does not work no windows", color='orange')
 
 parser = argparse.ArgumentParser(description = "Convert Video files from this playlist https://www.youtube.com/playlist?list=PLYlLZnjQQehAy4M9-DNVZmLN0MfilFMX-\nSpecifically convert them from a 360 video that is composed of 4 diffirent streams that are all packed together in one 16:9 video to a half SBS video. Watch one of the videos to see the format.")
 parser.add_argument('input_file')
@@ -43,14 +47,11 @@ if args.debug:
 
 print("out file:", out_file_name)
 
-if args.conversion_archive:
-    if not os.path.isfile(args.conversion_archive):
-        with open(args.conversion_archive, 'w'):
-            pass
+if args.conversion_archive and os.path.isfile(args.conversion_archive):
     with open(args.conversion_archive, 'r') as f:
         for line in f.readlines():
             if line.strip() == out_file_name.strip():
-                print(f"File {out_file_name} found in conversion archive", file=sys.stderr)
+                print(f"File {out_file_name} found in conversion archive")
                 exit(0)
 
 #extra_args += " -c:a copy"

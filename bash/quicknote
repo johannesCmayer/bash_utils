@@ -1,0 +1,10 @@
+#/bin/bash
+
+# This script is for taking very quick notes. If the
+# notes are important they should be copied to a more
+# permanent location after being written.
+
+dir="$HOME/org/quicknote"
+file="$dir/$(date -Is)"
+cd "$dir"
+vi "$file"
