@@ -9,6 +9,7 @@ import time
 from termcolor import cprint
 from pdb import set_trace
 import platform
+import math
 
 if platform.system() != "Linux":
     cprint("WARNING: This program runs a shell, and uses pipes to calculate the image dimensions. This has only been tested on Linux and likey does not work no windows", color='orange')
@@ -27,7 +28,7 @@ input_video_height = check_output(f"mediainfo '{args.input_file}' | grep Height 
 input_video_height = input_video_height.decode().strip()
 input_video_height = int(input_video_height)
 
-if input_video_height != 2160 or input_video_width != 3840:
+if input_video_height != 2160:
     cprint(f"WRONG DIMENSIONS. The input video {args.input_file} has dimension {input_video_width}x{input_video_height}. This program supports only 3840x2160.", color='red')
     exit(1)
 
@@ -36,7 +37,8 @@ if args.debug:
     extra_args = "-to 10"
 
 # The aspect ratio is not 16 to 9, so we want to crop away some of the sides
-width_for_16_by_9 = 960 * 16/9
+video_height = math.floor(input_video_width) / 4
+width_for_16_by_9 = video_height * 16/9
 cutoff_per_side = (2160 - width_for_16_by_9) / 2
 first_column = cutoff_per_side 
 last_column = 2160 - cutoff_per_side
@@ -57,8 +59,8 @@ if args.conversion_archive and os.path.isfile(args.conversion_archive):
 #extra_args += " -c:a copy"
 
 with tempfile.TemporaryDirectory() as temp_dir:
-    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:0'    {extra_args} '{temp_dir}'/1.mp4", shell=True)
-    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:960:{first_column}:1920' {extra_args} '{temp_dir}'/2.mp4", shell=True)
+    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:{video_height}:{first_column}:0'    {extra_args} '{temp_dir}'/1.mp4", shell=True)
+    check_output(f"ffmpeg -y -i '{args.input_file}' -vf 'transpose=1,crop={last_column}:{video_height}:{first_column}:{video_height / 4 * 2}' {extra_args} '{temp_dir}'/2.mp4", shell=True)
     check_output(f"ffmpeg -y -i '{temp_dir}'/1.mp4 -i '{temp_dir}'/2.mp4 -filter_complex hstack '{temp_dir}'/3.mp4", shell=True)
     check_output(f"ffmpeg -y -i '{temp_dir}'/3.mp4 -vf 'scale=1920x1080' -aspect 16:9 '{out_file_name}'", shell=True)
 
