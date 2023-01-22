@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set pen_id "PenTablet  Pen stylus"
 set pad_id "PenTablet  Pad pad"

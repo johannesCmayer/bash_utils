@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 for arg in $argv
     cat /mnt/data_main/data/lean/abbreviations.json | grep $arg

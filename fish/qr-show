@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set save_location /tmp/qr_code_(date -In).png
 

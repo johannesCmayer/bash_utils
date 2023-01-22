@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 INTERVAL=$((60*5))
 SAVE_LOC=~/Pictures/ScreenCaptures

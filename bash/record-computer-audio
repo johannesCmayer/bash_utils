@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 device="alsa_output.pci-0000_09_00.4.analog-stereo.monitor"
 name="/home/johannes/data/capture/audio/"$(date -Is)"_$1".mp3

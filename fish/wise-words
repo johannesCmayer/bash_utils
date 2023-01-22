@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
 

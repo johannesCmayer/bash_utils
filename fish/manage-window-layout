@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set SAVE_FILE "$HOME"/window_locations.txt
 

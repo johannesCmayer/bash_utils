@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set allowed_websites "toggl.com" "track.toggl.com" "calendar.google.com" "calendar.google.com" "app.wakingup.com"
 

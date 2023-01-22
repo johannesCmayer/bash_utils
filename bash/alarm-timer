@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This is a simple terminal alarm clock
 
 message="Your time is up!"

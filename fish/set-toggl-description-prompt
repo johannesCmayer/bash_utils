@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 function green
     echo '<fc=#00ff15>'$argv'</fc>'

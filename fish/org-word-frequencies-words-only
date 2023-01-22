@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 for i in echo (org-word-frequencies)
     echo (string split " " $i)[2]

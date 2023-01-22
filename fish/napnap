@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 function rnds
     set -l mdir $HOME/music/vocaloid_mp3

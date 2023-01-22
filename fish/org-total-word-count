@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set org_dir "$HOME"/org
 if [ (hostname) = 'Aqua' ]

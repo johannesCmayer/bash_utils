@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 echo -n (setxkbmap -query | grep layout | string replace -r 'layout:' '' | string trim)
 set var (setxkbmap -query | grep variant | string replace -r 'variant:' '' | string trim)

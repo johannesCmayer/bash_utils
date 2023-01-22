@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 if not [ -d lt_5m ] or not [ -d lt_15m ]
     echo directorie structure incorrect

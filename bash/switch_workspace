@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 last_path="$HOME"/last_desktop.txt
 current_path="$HOME"/current_desktop.txt

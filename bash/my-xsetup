@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 log_file="/home/johannes/resume_test_err_2.txt"
 

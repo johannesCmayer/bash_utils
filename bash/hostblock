@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 for i in "$1" "www.$1"; do 
   echo -e "127.0.0.1\t$i" | sudo tee -a /etc/hosts

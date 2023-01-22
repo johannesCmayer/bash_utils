@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ $(hostname) = "rimuru" ]; then
     org_path="$HOME/org"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This program organises a routine of pre sleep activities to facilitate lucid dreaming
 # and tries to wake you up between sleep cycles so that you can try to go back to sleep

@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 function bwlimit
   if [ (date +%H) -ge 0 -a (date +%H) -le 7 ]
     echo 1000

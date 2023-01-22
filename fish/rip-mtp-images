@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set mount_dir /run/user/1000/gvfs/*/Card
 if not set id (cat "$mount_dir/mtp_id.txt")

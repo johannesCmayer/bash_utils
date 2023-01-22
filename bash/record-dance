@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 record_dir=~/data/images_and_videos/produce/dance
 video_name="$(date '+%Y-%m-%d_%H-%M-%S')"
