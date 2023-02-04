@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-DEBUG=true
+which trash > /dev/null || { echo trash not found; exit 1; }
+which identify > /dev/null || { echo 'identify (from imagemagick) not found'; exit 1; }
 
 script_path=$(dirname -- "$( readlink -f -- "$0"; )")
 log_path="$( readlink -f -- "$0"; )".log
@@ -20,13 +21,32 @@ function xopp_draw_cmd {
     $draw_cmd $@ >&2
 }
 
+function inkscape_export_cmd {
+    in_file="$1"
+    out_file="$2"
+    inkscape --export-filename "$out_file" --export-type "png" --export-area-drawing --export-dpi=75 "$in_file"
+}
+
+# CONFIG
+# >>>>>>
+
+DEBUG=true
+
+function inkscape_draw_cmd {
+    inkscape $@ >&2
+}
+
 function draw_cmd {
-    xopp_draw_cmd $@
+    inkscape_draw_cmd $@
 }
 
 function export_cmd {
-    xopp_export_cmd $@
+    inkscape_export_cmd $@
 }
+
+FILE_ENDING='svg'
+
+# <<<<<<
 
 db_echo () {
     if $DEBUG; then
@@ -40,53 +60,51 @@ function main {
         exit 0
     fi
 
-    path="$HOME"/org/.draw_image_data
-    template=$path/template.xopp
+    path_rel_to_home="org/.draw_image_data"
+    path="$HOME"/"$path_rel_to_home"
+    template=$path/template."$FILE_ENDING"
 
     # ==========
-
-    which trash > /dev/null || { echo trash not found; exit 1; }
-    which uuidgen > /dev/null || { echo uuidgen not found; exit 1; }
-
-    file_name=$(uuidgen)
 
     if [ ! -z "$1" ]; then
         db_echo "setting filename to $1"
         file_name=$1
+    else
+        file_name=$(date "+%Y%m%d-%H%M%S-%6N")
     fi
 
-    path_xopp=$path/$(date -Is)_$file_name.xopp
-    path_png=$path/$(date -Is)_$file_name.png
+    source_file_path=$path/"$file_name"."$FILE_ENDING"
+    png_file_path=$path/"$file_name".png
 
     if [ "$2" = 'delete' ]; then
-        db_echo "deleting the following: $path_xopp $path_png"
-        trash "$path_xopp"
-        trash "$path_png"
+        db_echo "deleting the following: $source_file_path $png_file_path"
+        trash "$source_file_path"
+        trash "$png_file_path"
         exit 0
     fi
 
     if [ "$2" = 'update' ]; then
-        db_echo "reexporting: "$path_xopp" to "$path_png""
-        export_cmd "$path_xopp" "$path_png"
-        echo -n [[$path_png]]
+        db_echo "reexporting: "$source_file_path" to "$png_file_path""
+        export_cmd "$source_file_path" "$png_file_path"
+        echo -n [[~/$path_rel_to_home/$(basename $png_file_path)]]
         exit 0
     fi
 
-    if [ ! -f "$path_xopp" ]; then
-        db_echo "created: $path_xopp"
-        cp "$template" "$path_xopp"
+    if [ ! -f "$source_file_path" ]; then
+        db_echo "created: $source_file_path"
+        cp "$template" "$source_file_path"
     fi
 
-    draw_cmd "$path_xopp"
-    export_cmd "$path_xopp" "$path_png"
-    if [ "$(identify "$path_png" | awk '{print $3}')" = '1x1' ]; then
+    draw_cmd "$source_file_path"
+    export_cmd "$source_file_path" "$png_file_path"
+    if [ ! -f "$png_file_path" -o "$(identify "$png_file_path" | awk '{print $3}')" = '1x1' ]; then
         db_echo "No drawing in image. Aborting."
-        rm "$path_xopp"
-        rm "$path_png"
+        rm "$source_file_path"
+        rm "$png_file_path"
         exit 0
     fi
 
-    echo -n [[$path_png]]
+    echo -n [[~/$path_rel_to_home/$(basename $png_file_path)]]
 }
 
 echo "" > "$log_path"

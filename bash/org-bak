@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+if [ $(hostname) = "Aqua" ]; then
+    org_path="$HOME/data/org"
+    ping_url='https://hc-ping.com/ce8169be-85e0-4e22-b574-c35f45ae3302'
+else
+    org_path="$HOME/org"
+    ping_url='https://hc-ping.com/0a33c73d-49f0-4db4-b31f-5d2ae0f2b842'
+fi
+
+ping () {
+    val="$1"
+    if ! [ -z $val ]; then
+        val="/$val"
+    fi
+    curl --retry 3 "$ping_url""$val" 
+}
+
+run () {
+    echo '->' $@
+    $@
+}
+
+backup-org () {
+    run cd $org_path || return 1
+    run git add . || return 1
+    run git commit -m "auto-commit$(date -Im)" || return 1
+    run git pull origin master || return 1
+    run git push origin master || return 1
+}
+
+ping "start"
+
+if ( cd $org_path && git diff-index --quiet HEAD ); then
+    echo no changes, no commiting neccesary
+    ping
+    exit 0
+fi
+
+if ! backup-org; then
+    echo error in backup-org
+    ping 1
+else
+    echo backup complete
+    ping
+fi
