@@ -1,0 +1,11 @@
+now() { date +%s; }
+next() { date -d $(date -d "next ${1- hour}" '+%H:00:00') '+%s'; }
+
+bedtime=$(date -d '23:00:00' '+%s')
+
+while true; do
+   time_to_bedtime=$(date -d @$(( ($bedtime - $(date +%s)) - (60*60-60) )) '+%H:%M')
+   terminal-notifier -title $(basename $0) -message "It's $(date '+%H:%M'). EOD in "$time_to_bedtime
+   sleep 3
+   sleep $(( $(next) - $(now) ))
+done

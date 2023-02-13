@@ -2,6 +2,7 @@
 
 which trash > /dev/null || { echo trash not found; exit 1; }
 which identify > /dev/null || { echo 'identify (from imagemagick) not found'; exit 1; }
+which gdate > /dev/null || { echo gdate not found; exit 1; }
 
 script_path=$(dirname -- "$( readlink -f -- "$0"; )")
 log_path="$( readlink -f -- "$0"; )".log
@@ -70,7 +71,7 @@ function main {
         db_echo "setting filename to $1"
         file_name=$1
     else
-        file_name=$(date "+%Y%m%d-%H%M%S-%6N")
+        file_name=$(gdate '+%Y%m%d-%H%M%S-%6N')
     fi
 
     source_file_path=$path/"$file_name"."$FILE_ENDING"
