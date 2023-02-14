@@ -4,8 +4,17 @@ next() { date -d $(date -d "next ${1- hour}" '+%H:00:00') '+%s'; }
 bedtime=$(date -d '23:00:00' '+%s')
 
 while true; do
-   time_to_bedtime=$(date -d @$(( ($bedtime - $(date +%s)) - (60*60-60) )) '+%H:%M')
-   terminal-notifier -title $(basename $0) -message "It's $(date '+%H:%M'). EOD in "$time_to_bedtime
-   sleep 3
-   sleep $(( $(next) - $(now) ))
+   next_hour=$(next)
+   while true; do
+       echo -ne "\r$(( $next_hour - $(now) ))"
+       sleep 3
+       if [[ $(( $next_hour - $(now) )) > $(( 60*50 )) ]]; then
+           break
+       fi
+       if [[ $(( $next_hour - $(now) )) < 0 ]]; then
+           time_to_bedtime=$(date -d @$(( ($bedtime - $(date +%s)) - (60*60-60) )) '+%H:%M')
+           terminal-notifier -title $(basename $0) -message "It's $(date '+%H:%M'). EOD in "$time_to_bedtime -contentImage 'https://i.pinimg.com/originals/fc/60/62/fc60622ac3c047ba90d9adaba24325bd.jpg'
+           break
+       fi
+   done
 done
