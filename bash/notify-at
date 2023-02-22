@@ -1,5 +1,5 @@
 now() { date +%s; }
-next() { date -d $(date -d "next ${1- hour}" '+%H:00:00') '+%s'; }
+next() { date -d $(date -d "next ${2- hour}" '+%H:00:00') '+%s'; }
 
 bedtime=$(date -d '23:00:00' '+%s')
 
