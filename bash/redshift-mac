@@ -1,0 +1,2 @@
+killall redshift
+redshift -O 4000 -b 0.9
