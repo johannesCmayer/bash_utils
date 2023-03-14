@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+import socket
+import re
+from pynput.keyboard import Key, Controller
+
+keyboard = Controller()
+
+def backspace(n):
+    keyboard.type('\b'*n)
+
+def insert_string(s):
+    keyboard.type(s)
+
+def main():
+    HOST = "0.0.0.0"
+    START_PORT = 10940
+    END_PORT = START_PORT + 100
+
+    port = START_PORT
+
+    while True:
+        print(f"{port=}")
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((HOST, port))
+                s.listen()
+                print("Listening for connection")
+                conn, addr = s.accept()
+                print(f"Client connected {conn}")
+                with conn:
+                    while True:
+                        msg = conn.recv(1024)
+                        if not msg:
+                            break
+                        d_msg = msg.decode('utf-8')
+                        print("1:", d_msg)
+                        backspace_mark_regex = '<<backspace:(-?[0-9]*)>>'
+                        res = re.search(backspace_mark_regex, d_msg)
+                        # TODO this code is buggy. What if we get some prefix string before the backspace_mark?
+                        #      Then this breaks.
+                        if res:
+                            d_msg = re.sub(backspace_mark_regex, "", d_msg)
+                            print("backspaching:", res.group(1))
+                            backspace(int(res.group(1)))
+                        print("2nd:", d_msg)
+                        insert_string(d_msg)
+        except ConnectionResetError as err:
+            print(err)
+        except OSError as err:
+            if err.errno != 48:
+                raise err
+            port += 1
+            if port > END_PORT:
+                port = START_PORT
+
+
+if __name__ == "__main__":
+    main()
