@@ -1,0 +1,12 @@
+#!/usr/bin/fish
+set root "/home/johannes/org/images"
+set a (ls "$root" | grep IMG_ | tail -n 1)
+set root_depth (echo "$root" | tr -cd '/' | wc -c)
+set file_depth (pwd | tr -cd '/' | wc -c)
+
+echo -n "[[file:"
+for i in (seq 0 (math "$file_depth"-"$root_depth"))
+   echo -n "../"
+end
+echo -n "images/$a"
+echo -n "]]"

@@ -1,0 +1,3 @@
+#!/usr/bin/fish
+
+echo "$argv[1]" | sed 's/127.0.0.1/batou.ddns.net/g' | xclip -selection clipboard

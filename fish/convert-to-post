@@ -1,0 +1,18 @@
+#!/usr/bin/fish
+
+echo "Not done"
+exit 0
+
+set file (cat $argv[1])
+
+function put-imgur
+    set -l img $argv[1]
+    set -l path (find ~/obsidian_vaults -iname $img)
+    set -l url_txt (imgur-uploader $path)
+    set -l url #TODO
+    echo $file | sed -e "s/$img_name/$url/g"
+end
+
+for i in (string match --all '![[.*]]' $file)
+    echo $i
+end

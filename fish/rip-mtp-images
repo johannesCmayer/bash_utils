@@ -1,9 +1,30 @@
 #!/usr/bin/fish
 
+set size "$argv[1]"
+
+set org_dir ~/org
+set mtp_dir ~/mtp
+
+if [ (hostname) = Kazuma ]
+    :
+else
+    echo not Kazuma
+    exit 1
+end
+
 set mount_dir /run/user/1000/gvfs/*/Card
 if not set id (cat "$mount_dir/mtp_id.txt")
     echo mtp_id file not found.
     exit 1
 end
 
+set latest_img ~/mtp/"$id"/DCIM/Camera/(ls $mount_dir/DCIM/Camera | grep '.jpg' | tail -1)
+echo latest_img: $latest_img
+echo -e '#+attr_html: :width '$size'px'\n'#+attr_latex: :width '$size'px'\n"[[""$latest_img""]]" | xclip -selection clipboard
+
+echo rsync -av "$mount_dir/DCIM" ~/mtp/"$id"
 rsync -av "$mount_dir/DCIM" ~/mtp/"$id"
+
+
+echo rsync -av "$mount_dir/org/" ~/org/"$id"
+rsync -av "$mount_dir/org/" ~/org/"$id"

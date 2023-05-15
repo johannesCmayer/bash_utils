@@ -2,6 +2,10 @@
 
 set org_dir /mnt/data_main/org
 
+if ! [ -z $argv[1] ]
+  set org_dir $argv[1]
+end
+
 set x 0
 for f in "$org_dir"/**/*.org "$org_dir"/**/*.org_archive
   set wc (string split " " (wc -w $f))[1]
