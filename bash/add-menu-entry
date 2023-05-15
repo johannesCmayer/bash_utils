@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 name=$1
 command=$2
 filePath=$HOME/.local/share/applications/"$name".desktop

@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 if [ $argv[1] = "trans" ]
     cat $argv[2] | grep -e '[japanese|english]' | string replace '"japanese": "' "" | string replace '"english": "' "" | string replace -r '",?$' '' | string trim | bat

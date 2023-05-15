@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 rnd_sound_dir=/mnt/data_main/audio/cretating/random_sounds_LeshySF
 
 usage(){

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 help() {
 	echo "This script merges pds that are potentially passwordless encrypted and provides functionality to remove the fist page in selected pdf files."
 	echo ""

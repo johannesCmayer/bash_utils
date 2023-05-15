@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 logdir=/var/log
 cd $logdir
 [[ ! -d .scan-website ]] && mkdir .scan-website

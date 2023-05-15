@@ -1,4 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+log_file="/home/johannes/resume_test_err_2.txt"
+
+echo $(date) start > "$log_file"
+
+{
+
+if [ $(hostname) = Rimuru ]; then
+  export DISPLAY=:1
+fi
 
 # Displays
 if [ $(hostname) = Aqua ]; then
@@ -6,8 +16,8 @@ if [ $(hostname) = Aqua ]; then
   xrandr --output DVI-D-0 --primary
   xrandr --output HDMI-0 --right-of DVI-D-0
   xrandr --output DP-2 --right-of HDMI-0
+  xset dpms $((60 * 10)) $((60 * 30)) $((60 * 45))
 fi
-xset dpms $((60 * 10)) $((60 * 30)) $((60 * 45))
 
 # Keyboard
 xset s off
@@ -26,7 +36,7 @@ setxkbmap -option caps:escape
 if [ $(hostname) = Aqua ]; then
   hsetroot -solid '#09000F'
   nitrogen --restore
+  wacom-setup inkscape
 fi
-wacom-setup inkscape
 
-udevadm trigger
+} >> "$log_file" 2>> "$log_file"

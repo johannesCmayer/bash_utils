@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 start-stop-daemon --start --pidfile /run/update-date-file.pid --startas /home/johannes/data/projects_software/shell/bash/update-date-file &
 

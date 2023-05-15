@@ -1,0 +1,3 @@
+#!/usr/bin/env fish
+
+echo "$argv" | string replace --all " " "_" | string lower | cat

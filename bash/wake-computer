@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 [[ $1 == '' ]] && echo Usage: $(basename $0) ip port mac-address && exit 0
 
 ip=$1

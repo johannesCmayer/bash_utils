@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # NAME: flash-primary-screen.sh
 # PATH: ~/bin

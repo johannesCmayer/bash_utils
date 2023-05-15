@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 mad-max-plotter \
 --tmpdir /mnt/firecuda1/chia_plots_tmp_1/ \

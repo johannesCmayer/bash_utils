@@ -1,0 +1,17 @@
+#/bin/bash
+
+# This script is for taking very quick notes. If the
+# notes are important they should be copied to a more
+# permanent location after being written.
+#
+# The idea is that no matter where you are, you can
+# quickly wip open a terminal and type qn.
+#
+# After writing down a note, you can rename it with
+# :e . and then R. Ideally only append a descriptive
+# name, and don't change the timestamp.
+
+dir="$HOME/org/quicknote"
+file="$dir/$(date -Is)"
+cd "$dir"
+vi "$file"

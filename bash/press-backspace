@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+echo -e 'repeat '$1' times\ntell application "System Events" to key code 51\nEnd repeat' | osascript

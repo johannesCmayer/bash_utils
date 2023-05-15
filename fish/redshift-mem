@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 argparse -X 0 'w/whiter' 'r/redder' 'b/brighter' 'd/darker' 'R/direct-redness=' 'B/direct-brigtness=' -- $argv 
 or exit 1

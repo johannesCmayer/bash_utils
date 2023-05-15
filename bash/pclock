@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script startsup the shutdown_and_restart and logs it's usage.
 

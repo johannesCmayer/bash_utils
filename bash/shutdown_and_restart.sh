@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script shutsdown the Computer for a certain time period, then reboots and plays music with a crescendo effect.
 

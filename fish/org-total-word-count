@@ -1,6 +1,9 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
-set org_dir /mnt/data_main/org
+set org_dir "$HOME"/org
+if [ (hostname) = 'Aqua' ]
+    set org_dir /mnt/data_main/org
+end
 
 if ! [ -z $argv[1] ]
   set org_dir $argv[1]
@@ -11,4 +14,4 @@ for f in "$org_dir"/**/*.org "$org_dir"/**/*.org_archive
   set wc (string split " " (wc -w $f))[1]
   set x (math "$x+$wc")
 end
-echo $x
+printf "%'.3d\n" $x

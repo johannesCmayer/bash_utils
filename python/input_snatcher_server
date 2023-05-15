@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+import socket
+import re
+from pynput.keyboard import Key, Controller
+import os
+import argparse
+from pathlib import Path
+import time
+
+keyboard = Controller()
+project_dir = os.path.dirname(os.path.abspath(__file__))
+disabeled_flag_file = Path(f"{project_dir}/disabeled_flag")
+parser = argparse.ArgumentParser(os.path.basename(__file__))
+parser.add_argument('--enable', action='store_true')
+parser.add_argument('--disable', action='store_true')
+parser.add_argument('--toggle', action='store_true')
+args = parser.parse_args()
+
+def enabled():
+    return not disabeled_flag_file.exists()
+
+def backspace(n):
+    if enabled() and n > 0:
+        keyboard.type('\b'*n)
+        # for i in range(n):
+        #     keyboard.type('\b')
+        #     time.sleep(0.025*2)
+
+def insert_string(s):
+    if enabled():
+        keyboard.type(s)
+
+def server():
+    HOST = "0.0.0.0"
+    START_PORT = 10940
+    END_PORT = START_PORT + 15
+
+    port = START_PORT
+
+    while True:
+        print(f"{port=}")
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind((HOST, port))
+                s.listen()
+                print("Listening for connection")
+                conn, addr = s.accept()
+                print(f"Client connected {conn}")
+                with conn:
+                    while True:
+                        msg = conn.recv(1024)
+                        if not msg:
+                            break
+                        d_msg = msg.decode('utf-8')
+                        print("1:", d_msg)
+                        backspace_mark_regex = '<<backspace:(-?[0-9]*)>>'
+                        res = re.search(backspace_mark_regex, d_msg)
+                        # TODO this code is buggy. What if we get some prefix string before the backspace_mark?
+                        #      Then this breaks.
+                        if res:
+                            d_msg = re.sub(backspace_mark_regex, "", d_msg)
+                            print("backspaching:", res.group(1))
+                            backspace(int(res.group(1)))
+                        print("2nd:", d_msg)
+                        insert_string(d_msg)
+        except ConnectionResetError as err:
+            print(err)
+        except OSError as err:
+            if err.errno != 48:
+                raise err
+            port += 1
+            if port > END_PORT:
+                port = START_PORT
+
+
+def main():
+    if args.enable:
+        disabeled_flag_file.unlink(missing_ok=True)
+        exit(0)
+    if args.disable:
+        disabeled_flag_file.touch(exist_ok=True)
+        exit(0)
+    if args.toggle:
+        if disabeled_flag_file.exists:
+            disabeled_flag_file.unlink(missing_ok=True)
+        else:
+            disabeled_flag_file.touch(exist_ok=True)
+        exit(0)
+    server()
+
+if __name__ == "__main__":
+    main()

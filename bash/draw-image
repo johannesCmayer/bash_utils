@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+which trash > /dev/null || { echo trash not found; exit 1; }
+which identify > /dev/null || { echo 'identify (from imagemagick) not found'; exit 1; }
+which gdate > /dev/null || { echo gdate not found; exit 1; }
+
+script_path=$(dirname -- "$( readlink -f -- "$0"; )")
+log_path="$( readlink -f -- "$0"; )".log
+
+function xopp_export_cmd {
+    in_file="$1"
+    out_file="$2"
+    xournalpp --export-no-background --export-no-ruling --create-img="$out_file" "$in_file" >&2
+    mogrify -trim "$out_file"
+}
+
+function xopp_draw_cmd {
+    draw_cmd=xournalpp
+    #if [ "$(hostname)" = rimuru ]; then
+    #    draw_cmd='flatpak run com.github.xournalpp.xournalpp'
+    #fi
+    $draw_cmd $@ >&2
+}
+
+function inkscape_export_cmd {
+    in_file="$1"
+    out_file="$2"
+    inkscape --export-filename "$out_file" --export-type "png" --export-area-drawing --export-dpi=75 "$in_file"
+}
+
+# CONFIG
+# >>>>>>
+
+DEBUG=true
+
+function inkscape_draw_cmd {
+    inkscape $@ >&2
+}
+
+function draw_cmd {
+    inkscape_draw_cmd $@
+}
+
+function export_cmd {
+    inkscape_export_cmd $@
+}
+
+FILE_ENDING='svg'
+
+# <<<<<<
+
+db_echo () {
+    if $DEBUG; then
+        echo $@ >&2
+    fi
+}
+
+function main {
+    if [ "$1" = 'log' ]; then
+        cat "$log_path"
+        exit 0
+    fi
+
+    path_rel_to_home="org/.draw_image_data"
+    path="$HOME"/"$path_rel_to_home"
+    template=$path/template."$FILE_ENDING"
+
+    # ==========
+
+    if [ ! -z "$1" ]; then
+        db_echo "setting filename to $1"
+        file_name=$1
+    else
+        file_name=$(gdate '+%Y%m%d-%H%M%S-%6N')
+    fi
+
+    source_file_path=$path/"$file_name"."$FILE_ENDING"
+    png_file_path=$path/"$file_name".png
+
+    if [ "$2" = 'delete' ]; then
+        db_echo "deleting the following: $source_file_path $png_file_path"
+        trash "$source_file_path"
+        trash "$png_file_path"
+        exit 0
+    fi
+
+    if [ "$2" = 'update' ]; then
+        db_echo "reexporting: "$source_file_path" to "$png_file_path""
+        export_cmd "$source_file_path" "$png_file_path"
+        echo -n [[~/$path_rel_to_home/$(basename $png_file_path)]]
+        exit 0
+    fi
+
+    if [ ! -f "$source_file_path" ]; then
+        db_echo "created: $source_file_path"
+        cp "$template" "$source_file_path"
+    fi
+
+    draw_cmd "$source_file_path"
+    export_cmd "$source_file_path" "$png_file_path"
+    if [ ! -f "$png_file_path" -o "$(identify "$png_file_path" | awk '{print $3}')" = '1x1' ]; then
+        db_echo "No drawing in image. Aborting."
+        rm "$source_file_path"
+        rm "$png_file_path"
+        exit 0
+    fi
+
+    echo -n [[~/$path_rel_to_home/$(basename $png_file_path)]]
+}
+
+echo "" > "$log_path"
+main $@ 2>> "$log_path"

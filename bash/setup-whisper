@@ -1,0 +1,17 @@
+# Docker
+touch ~/.no_auto_tmux
+apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub
+apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub
+curl -sSL https://get.docker.com/ | sudo sh
+
+# Bare
+wget https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
+bash Miniconda3-py310_23.1.0-1-Linux-x86_64.sh
+eval "$(/root/miniconda3/bin/conda shell.bash hook)"
+conda init
+pip3 install poetry
+pip3 install torch==1.13.0+cu117 -f https://download.pytorch.org/whl/torch
+git clone https://github.com/ahmetoner/whisper-asr-webservice.git
+cd whisper-asr-webservice
+poetry install
+poetry run gunicorn --bind 0.0.0.0:9000 --workers 1 --timeout 0 app.webservice:app -k uvicorn.workers.UvicornWorker

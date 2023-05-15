@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set -l file_info (gphoto2 --list-files | tail -n 1)
 set -l file_idx (echo $file_info | awk '{print $1}' | sed -s 's/#//g')

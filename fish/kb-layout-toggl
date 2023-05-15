@@ -1,4 +1,4 @@
-#!/usr/bin/fish
+#!/usr/bin/env fish
 
 set script_name (basename (status --current-filename))
 set state_file "$HOME/$script_name"".state"
