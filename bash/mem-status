@@ -1,0 +1,2 @@
+#!/bin/sh
+free -mh | awk '/^Mem:/ {print $4" / "$7" / "$2}'
