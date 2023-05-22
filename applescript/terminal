@@ -1,0 +1,7 @@
+#!/usr/bin/osascript
+tell application "Terminal"
+    if it is running then
+        do script ""
+    end if
+    activate
+end tell
