@@ -1,15 +1,5 @@
 #!/usr/bin/env bash
 
-log_file="/home/johannes/resume_test_err_2.txt"
-
-echo $(date) start > "$log_file"
-
-{
-
-if [ $(hostname) = Rimuru ]; then
-  export DISPLAY=:1
-fi
-
 # Displays
 if [ $(hostname) = Aqua ]; then
   xrandr --auto
@@ -24,20 +14,23 @@ xset s off
 xset r rate 250 30
 setxkbmap -option compose:ralt
 setxkbmap -layout us -variant dvorak
+xmodmap ~/.Xmodmap
 
 # Touchpad
-xinput --set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1
-xinput --set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 1
+touchpad_id=$(xinput list | grep "Touchpad" | awk '{for(i=1;i<=NF;++i)if($i~/^id=/){split($i, a, "="); print(a[2]); exit}}')
+echo "$touchpad_id"
+xinput --set-prop "$touchpad_id" 'libinput Tapping Enabled' 1
+xinput --set-prop "$touchpad_id" 'libinput Natural Scrolling Enabled' 1
 
 
 ## Map capslock to escape
 setxkbmap -option caps:escape
 
 # Misc
+hsetroot -solid '#09000F'
+
 if [ $(hostname) = Aqua ]; then
   hsetroot -solid '#09000F'
   nitrogen --restore
   wacom-setup inkscape
 fi
-
-} >> "$log_file" 2>> "$log_file"

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+sound=~/sound/system-sounds/wodden_bong.wav
+
+while true; do
+    if [ $(acpi -b | awk '{print $3}') = "Discharging," -a $(cat /sys/class/power_supply/BAT0/capacity) -lt 15 ]; then
+        mpv "$sound"
+    fi
+    sleep 3
+done

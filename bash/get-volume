@@ -1,22 +1,5 @@
 #!/bin/sh
-getdefaultsinkname() {
-    pacmd stat | awk -F": " '/^Default sink name: /{print $2}'
-}
-
-getdefaultsinkvol() {
-    pacmd list-sinks |
-        awk '/^\s+name: /{indefault = $2 == "<'$(getdefaultsinkname)'>"}
-            /^\s+volume: / && indefault {print $5; exit}'
-}
-
-get_main_sink_vol() {
-    pacmd list-sinks |
-        awk '/^\s+name: /{indefault = $2 == "<alsa_output.pci-0000_0a_00.4.analog-stereo>"}
-            /^\s+volume: / && indefault {print $5; exit}'
-}
-
-setdefaulsinkvol() {
-    pactl set-sink-volume $(getdefaultsinkname) $1
-}
-
-echo $(getdefaultsinkvol) #ms:$(pactl list sinks | grep mic_mix_sink-their_mixer -C 4 | grep Mute: | sed 's/\sMute\:\s//g')
+# Note that you only get the right audio channel volume. The left one would be $5. 
+vol=$(pactl get-sink-volume $(pactl get-default-sink) | awk '/Volume:/ {print $12}')
+mute=$(pactl get-sink-mute $(pactl get-default-sink) | awk '{print "m:"$2}')
+echo $mute $vol

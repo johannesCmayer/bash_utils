@@ -1,2 +1,2 @@
 #!/bin/sh
-df ~ -h | awk '/\/dev\/mapper\/mint--vg-root/ {print $4}'
+df ~ -h | awk 'NR==2 {print $4}'

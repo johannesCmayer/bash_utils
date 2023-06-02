@@ -85,11 +85,7 @@ if [ ! -z $(command -v espeak) ]; then
       o_vol=$(echo $(pulsemixer --get-volume) | cut -d" " -f1)
       amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
       # pactl -- set-sink-volume 0 50%
-      if which gsay; then
-          gsay "$1"
-      else
-	  espeak "$1"
-      fi
+      espeak "$1"
       # pactl -- set-sink-volume 0 "$o_vol"%
       amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
    }
@@ -99,6 +95,11 @@ if [ ! -z $(command -v espeak) ]; then
 #     espeak $espeakargs "$1"
 #     amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
 #   }
+
+elif which gsay; then
+  function speak_cmd {
+    "gsay" $1
+  }
 elif [ ! -z $(command -v say) ]; then
   function speak_cmd {
     "say" $1

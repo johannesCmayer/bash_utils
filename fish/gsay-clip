@@ -1,0 +1,14 @@
+#!/usr/bin/fish
+set pid_path "/tmp/gsay-clip.pid"
+
+if [ -f "$pid_path" ]
+    killall mplayer
+    rm "$pid_path"
+    exit 0
+end
+
+echo %self > "$pid_path"
+
+set text (xclip -selection primary -out)
+gsay "$text"
+rm "$pid_path"

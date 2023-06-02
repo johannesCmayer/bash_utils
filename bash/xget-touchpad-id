@@ -1,0 +1,2 @@
+#!/bin/bash
+xinput list | grep "Touchpad" | awk '{for(i=1;i<=NF;++i)if($i~/^id=/){split($i, a, "="); print(a[2]); exit}}'
