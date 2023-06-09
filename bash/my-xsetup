@@ -10,11 +10,8 @@ if [ $(hostname) = Aqua ]; then
 fi
 
 # Keyboard
-xset s off
 xset r rate 250 30
-setxkbmap -option compose:ralt
-setxkbmap -layout us -variant dvorak
-xmodmap ~/.Xmodmap
+# xmodmap ~/.Xmodmap
 
 # Touchpad
 touchpad_id=$(xinput list | grep "Touchpad" | awk '{for(i=1;i<=NF;++i)if($i~/^id=/){split($i, a, "="); print(a[2]); exit}}')
