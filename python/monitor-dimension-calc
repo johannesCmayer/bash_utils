@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+import argparse
+import math
+
+parser = argparse.ArgumentParser(description='Calculate the dimensions of a monitor, based on the diagonal length and aspect ratio.')
+parser.add_argument('--diagonal', type=float, help='The diagonal length of the monitor, in inches.')
+parser.add_argument('--aspect-ratio', type=str, help='The aspect ratio of the monitor, in the form of "width:height".')
+args = parser.parse_args()
+
+
+def calc_dim(w, h, d):
+    x = math.sqrt(d ** 2 / (w**2 + h**2))
+    return (w * x, h * x)
+
+def approx_equal(a, b, tolerance=0.1):
+    return abs(a - b) < tolerance
+
+def test():
+    w, h = calc_dim(21, 9, 86.7)
+    assert approx_equal(w, 79.59) and approx_equal(h, 34,11)
+
+if __name__ == '__main__':
+    test()
+    if args.diagonal and args.aspect_ratio:
+        w, h = args.aspect_ratio.split(':')
+        w, h = float(w), float(h)
+        w, h = calc_dim(w, h, args.diagonal)
+        print(f'Monitor Dimentions:  {w:.2f} x {h:.2f}')
