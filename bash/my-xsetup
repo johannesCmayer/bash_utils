@@ -9,17 +9,19 @@ if [ $(hostname) = Aqua ]; then
   xset dpms $((60 * 10)) $((60 * 30)) $((60 * 45))
 fi
 
-# Keyboard
-xset r rate 250 30
-# xmodmap ~/.Xmodmap
-
 # Touchpad
 touchpad_id=$(xinput list | grep "Touchpad" | awk '{for(i=1;i<=NF;++i)if($i~/^id=/){split($i, a, "="); print(a[2]); exit}}')
-echo "$touchpad_id"
 xinput --set-prop "$touchpad_id" 'libinput Tapping Enabled' 1
 xinput --set-prop "$touchpad_id" 'libinput Natural Scrolling Enabled' 1
+xinput --set-prop "$touchpad_id" 'libinput Natural Scrolling Enabled' 1
+xinput --set-prop "$touchpad_id" 'libinput Accel Speed' 0.0
+xinput --set-prop "$touchpad_id" 'libinput Middle Emulation Enabled' 1
 
-
+# Capslock
+## Turn off
+if [ $(xset -q | grep 'Caps Lock' | awk '{print $4}') = 'on' ]; then
+    xdotool key Caps_Lock
+fi
 ## Map capslock to escape
 setxkbmap -option caps:escape
 
@@ -31,3 +33,7 @@ if [ $(hostname) = Aqua ]; then
   nitrogen --restore
   wacom-setup inkscape
 fi
+
+# Keyboard
+xset r rate 250 30
+xmodmap ~/.Xmodmap
