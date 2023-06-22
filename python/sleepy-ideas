@@ -1,0 +1,27 @@
+import pygame
+import time
+
+pygame.init()
+pygame.mixer.init()
+
+# Load the sound file
+sound = pygame.mixer.Sound('/home/johannes/sound/bells/gong-hit-1.mp3')
+
+# Initialize the joystick module
+pygame.joystick.init()
+
+# Get the first joystick
+joystick = pygame.joystick.Joystick(0)
+joystick.init()
+
+# Main loop
+while True:
+    # Process events
+    for event in pygame.event.get():
+        if event.type == pygame.JOYBUTTONUP:
+            # Check if the button 11 is pressed, assuming buttons are 0-indexed
+            if event.button == 10:
+                sound.play()
+
+    # Throttle the loop to save CPU usage
+    time.sleep(0.1)
