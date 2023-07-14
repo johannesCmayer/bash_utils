@@ -1,0 +1,14 @@
+#!/usr/bin/env fish
+set file        $1
+set target_file $2
+
+set host "batou.ddns.net"
+
+if [ "$file" = "$target_file" ]
+    echo Error file and target file need to be different
+    exit 1
+end
+rsync --progress "$file" batou.ddns.net:/tmp/"$file"
+ssh "$host" ffmpeg -i /tmp/"$file" /tmp/"$target_file"
+rsync --progress batou.ddns.net:/tmp/"$target_file" "$target_file"
+ssh batou.ddns.net rm /tmp/"$file" /tmp/"$target_file"
