@@ -1,0 +1,15 @@
+#!/usr/bin/fish
+set obsidian_vault ~/writing/obsidian/main
+set targets "thinking/AIA" "thinking/How to do Research"
+set name (date -I)_science_alg
+mkdir temp
+cd temp
+cp -r "$obsidian_vault"/.obsidian .
+for t in $targets
+    set src "$obsidian_vault"/"$t"
+    set dst "$t"
+    mkdir -p (dirname "$dst")
+    cp -r "$src" "$dst"
+end
+cd ..
+tar -czf - temp | openssl enc -e -aes256 -out "$name".tar.gz

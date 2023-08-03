@@ -1,0 +1,49 @@
+#!/usr/bin/env fish
+
+function help
+    echo 'Usage:'
+    echo '    -t/--target TARGET    The file to be moved. (REQUIRED)'
+    echo '    -n/--name NAME    The now name of the file and enclosing folder. (REQUIRED)'
+    echo '    -p/--prompts PROMPT1 [PROMPT2 ...]    The prompts used to generate the thumbnails (the name is the first prompt). (REQUIRED)'
+    echo '    --no-thumbnails    Do not generate thumnails'
+    echo '    -h/--help    Show this message'
+end
+
+if ! argparse 'h/help' 't/target=' 'n/name=' 'p/prompts=' 'no-thumbnails' 'debug' -- $argv
+    exit 1
+end
+
+if [ -n "$_flag_debug" ]
+    echo "Parsed Arguments:"
+    echo "    target: $_flag_target"
+    echo "    name: $_flag_name"
+    echo "    prompts: $_flag_prompts"
+    echo "    no_thumbnails: $_flag_no_thumbnails"
+end
+
+if [ -n "$_flag_help" ]
+    help
+    exit 0
+end
+
+if [ -z "$_flag_target" -o -z "$_flag_name" -o -z "$_flag_prompts" ]
+    echo helping
+    help
+    exit 1
+end
+
+set start_dir (pwd)
+
+# Move a cecorded youtube video to a new folder
+mv "$_flag_target" "$_flag_name".mkv
+set target_dir ~/videos/youtube/"$_flag_name"
+mkdir "$target_dir"
+mv "$_flag_name".mkv "$target_dir"
+cd "$target_dir"
+
+if [ -z "$_flag_no_thumbnails" ]
+    thumbnailer "$_flag_name" $_flag_prompts
+    open "$target_dir"
+end
+
+cd "$start_dir"

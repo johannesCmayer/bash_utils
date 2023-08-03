@@ -1,20 +1,7 @@
 #!/usr/bin/env bash
 # This is a simple terminal alarm clock
 
-message="Your time is up!"
-imessage="Go"
-prompt=""
-
-espeakargs=""
-
-speed=175
-pitch=50
-
-seconds=0
-minutes=0
-hours=0
-
-help_message() {
+help_message () {
   echo "usage: $(basename $0) [OPTIONS] secondsToAlarm [OPTIONS]"
   echo "       Arguments to long options are also requried for short options."
   echo ""
@@ -37,9 +24,35 @@ help_message() {
   echo "  --help: Display this message."
 }
 
+date () {
+    # We are using features only present in gnu date, and therefore we need
+    # To use that instead of the default macOS date command.
+    if [ $(uname) = "Darwin" ]; then
+        gdate "$@"
+    else
+        date "$@"
+    fi
+}
+
+# Default arguments
+message="Your time is up!"
+imessage="Go"
+prompt=""
+
+espeakargs=""
+
+speed=175
+pitch=50
+
+seconds=0
+minutes=0
+hours=0
+
 repeat=false
 verbose=false
 warn=false
+
+# Parse the arguments
 while test $# -gt 0
 do
   case "$1" in
@@ -80,7 +93,15 @@ if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
   exit 1
 fi
 
-if [ ! -z $(command -v espeak) ]; then
+if which gsay; then
+  function speak_cmd {
+    "gsay" $1
+  }
+elif [ -n $(command -v say) ]; then
+  function speak_cmd {
+    "say" $1
+  }
+elif [ -n $(command -v espeak) ]; then
   function speak_cmd {
       o_vol=$(echo $(pulsemixer --get-volume) | cut -d" " -f1)
       amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
@@ -89,21 +110,6 @@ if [ ! -z $(command -v espeak) ]; then
       # pactl -- set-sink-volume 0 "$o_vol"%
       amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
    }
-#  function speak_cmd {
-#     amixer -c 1 set 'Auto-Mute Mode' Disabled > /dev/null
-#     $verbose && echo "espeak $espeakargs $1"
-#     espeak $espeakargs "$1"
-#     amixer -c 1 set 'Auto-Mute Mode' Enabled > /dev/null
-#   }
-
-elif which gsay; then
-  function speak_cmd {
-    "gsay" $1
-  }
-elif [ ! -z $(command -v say) ]; then
-  function speak_cmd {
-    "say" $1
-  }
 else
   echo "No tts command found"
   exit 1

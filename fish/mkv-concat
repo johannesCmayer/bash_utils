@@ -1,0 +1,13 @@
+#!/usr/bin/env fish
+set final_name '0000_main.mkv'
+set tmp_name 'new.mkv'
+mkdir old
+find . -name '*.mkv' -maxdepth 1 | sed 's|^\./||' | sort -V | sed 's:\ :\\\ :g'| sed 's/^/file /' > fl.txt; ffmpeg -f concat -safe 0 -i fl.txt -c copy "$tmp_name"
+for f in (find . -name '*.mkv' -maxdepth 1 ! -name "$tmp_name" ! -name "$final_name")
+    mv "$f" old
+end
+mv "$tmp_name" "$final_name"
+rm fl.txt
+cat fl.txt
+sleep 0.1
+open 0000_main-proj.llc

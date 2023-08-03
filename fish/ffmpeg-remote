@@ -1,11 +1,14 @@
 #!/usr/bin/env fish
-set file        $1
-set target_file $2
+
+set file        "$argv[1]"
+set target_file "$argv[2]"
 
 set host "batou.ddns.net"
 
 if [ "$file" = "$target_file" ]
     echo Error file and target file need to be different
+    echo got target_file: $target_file
+    echo got file: $file
     exit 1
 end
 rsync --progress "$file" batou.ddns.net:/tmp/"$file"
