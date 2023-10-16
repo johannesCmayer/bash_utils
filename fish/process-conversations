@@ -1,0 +1,41 @@
+#!/usr/bin/env fish
+
+set target_files (find . -name '*.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -path './funny/*')
+#set filtered_target_files ""
+
+for file in $target_files
+    set base_path (dirname "$file")/(basename "$file" .mkv)
+    set out_file "$base_path"_ALTERED_SUBED.mkv
+    if  [ -f "$out_file" ]
+	# echo "For this file there is already a subed file: $file"
+        continue
+    end
+    set -p filtered_target_files "$file"
+end
+
+set target_files $filtered_target_files
+echo "Target Files:"
+for f in $target_files
+    echo "$f"
+end
+
+read -p 'echo Pess enter to continue.'
+for file in $target_files
+    echo "Processing: $file"
+    set base_path (dirname "$file")/(basename "$file" .mkv)
+    set cut_file "$base_path"_ALTERED.mkv
+    set transcription_dir "$base_path"_SUBS
+    set out_file "$base_path"_ALTERED_SUBED.mkv
+
+    if [ ! -f "$cut_file" ]
+        auto-editor --video-bitrate unset --no-open "$file" --output "$cut_file"
+    else
+        echo "For this file there is already a cut file."
+    end
+
+    whisper --threads 16 --model large --output_dir "$transcription_dir" "$cut_file"
+    set transcription_path "$transcription_dir"/(basename "$cut_file" .mkv).srt
+    ffmpeg -y -i "$cut_file" -i "$transcription_path" -c copy -c:s copy "$out_file"
+    rm "$cut_file"
+    rm -r "$transcription_dir"
+end

@@ -24,15 +24,11 @@ help_message () {
   echo "  --help: Display this message."
 }
 
-date () {
-    # We are using features only present in gnu date, and therefore we need
-    # To use that instead of the default macOS date command.
-    if [ $(uname) = "Darwin" ]; then
-        gdate "$@"
-    else
-        date "$@"
-    fi
-}
+if [ $(uname) = "Darwin" ]; then
+    date_cmd=gdate
+else
+    date_cmd=date
+fi
 
 # Default arguments
 message="Your time is up!"
@@ -115,12 +111,12 @@ else
   exit 1
 fi
 
-START_TIME=$(date '+%s')
-END_TIME=$(date '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
-READABLE_END_TIME=$(date -d "+ $hours hours + $minutes minutes + $seconds seconds")
+START_TIME=$($date_cmd '+%s')
+END_TIME=$($date_cmd '+%s' -d "+ $hours hours + $minutes minutes + $seconds seconds")
+READABLE_END_TIME=$($date_cmd -d "+ $hours hours + $minutes minutes + $seconds seconds")
 # echo "End time: $READABLE_END_TIME"
 
-sec=$((END_TIME - $(date '+%s')))
+sec=$((END_TIME - $($date_cmd '+%s')))
 while true; do
   speak_cmd "$imessage"
   sec_remaining=sec

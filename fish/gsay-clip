@@ -2,13 +2,13 @@
 set pid_path "/tmp/gsay-clip.pid"
 
 if [ -f "$pid_path" ]
-    killall mplayer
+    kill -SIGTERM (cat $pid_path)
     rm "$pid_path"
     exit 0
 end
 
-echo %self > "$pid_path"
-
 set text (xclip -selection primary -out)
-gsay "$text"
+gsay --speed 1.4 "$text" &
+echo $last_pid > "$pid_path"
+wait
 rm "$pid_path"

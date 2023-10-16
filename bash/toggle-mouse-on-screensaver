@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# allow only one instance
+r=$(pidof -x -o $$ ssmonoff.sh)
+set -- $r
+mouse_name="ROCCAT ROCCAT Tyon Black Mouse"
+if [ "${#@}" -ge 1 ]; then
+    echo "Script already running. Exit..."
+    exit
+fi
+
+dbus-monitor --session "type='signal',interface='org.gnome.ScreenSaver'" | ( while read line; do
+    if echo $line | grep "boolean true" &> /dev/null; then
+            xinput --set-prop "$mouse_name" "Device Enabled" "0"
+            xset dpms force off
+    else
+            xinput --set-prop "$mouse_name" "Device Enabled" "1"
+    fi
+done )

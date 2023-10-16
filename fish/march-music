@@ -1,0 +1,9 @@
+#!/usr/bin/env fish
+
+while true
+    for i in (find ~/sound/music/march_music -type f | shuf)
+        echo (basename "$i")
+        mpv --msg-level=cplayer=error  $i
+        read -p "echo Press Enter to play next song"
+    end
+end
