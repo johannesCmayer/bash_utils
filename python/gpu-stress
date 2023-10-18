@@ -1,0 +1,12 @@
+#!/home/johannes/miniconda3/envs/jax/bin/python
+
+import jax.numpy as jnp
+from jax import grad, jit, vmap
+from jax import random
+
+size = 5000
+key = random.PRNGKey(0)
+x = random.normal(key, (size, size), dtype=jnp.float32)
+
+while True:
+    jnp.dot(x, x.T).block_until_ready()

@@ -1,8 +1,9 @@
 #!/usr/bin/env fish
 
-set target_files (find . -name '*.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -path './funny/*')
-#set filtered_target_files ""
+# Select files that we want to process
+set target_files (find . -name '*.mkv' -not -name '*_ALTERED.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -path './funny/*' | sort)
 
+# Filter the files to ignore already processed files.
 for file in $target_files
     set base_path (dirname "$file")/(basename "$file" .mkv)
     set out_file "$base_path"_ALTERED_SUBED.mkv
@@ -14,28 +15,44 @@ for file in $target_files
 end
 
 set target_files $filtered_target_files
+
+# Let user confirm targeted Files
 echo "Target Files:"
 for f in $target_files
     echo "$f"
 end
-
 read -p 'echo Pess enter to continue.'
+
+# Process each file
 for file in $target_files
     echo "Processing: $file"
     set base_path (dirname "$file")/(basename "$file" .mkv)
     set cut_file "$base_path"_ALTERED.mkv
     set transcription_dir "$base_path"_SUBS
     set out_file "$base_path"_ALTERED_SUBED.mkv
+    set normalized_file "$base_path"_NORMALIZED.mkv
 
-    if [ ! -f "$cut_file" ]
-        auto-editor --video-bitrate unset --no-open "$file" --output "$cut_file"
+    echo "Normalizing Audio"
+    if [ ! -f "$normalized_file" ]
+        ffmpeg-normalize -o "$normalized_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress --print-stats "$file" || exit 1
     else
-        echo "For this file there is already a cut file."
+        echo "For this file there is already a normalized file. I will use that."
     end
 
-    whisper --threads 16 --model large --output_dir "$transcription_dir" "$cut_file"
+    echo "Removing Silence"
+    if [ ! -f "$cut_file" ]
+        auto-editor --silent-speed 10 --video-bitrate unset --no-open "$normalized_file" --output "$cut_file" || exit 1
+    else
+        echo "For this file there is already a cut file. I will use that."
+    end
+
+    echo "Generating Transcript"
+    whisper-ctranslate2 --model large-v2 --word_timestamps true --highlight_words true --output_dir "$transcription_dir" "$cut_file" || exit 1
     set transcription_path "$transcription_dir"/(basename "$cut_file" .mkv).srt
     ffmpeg -y -i "$cut_file" -i "$transcription_path" -c copy -c:s copy "$out_file"
+
+    # Cleanup
     rm "$cut_file"
     rm -r "$transcription_dir"
+    rm "$normalized_file"
 end
