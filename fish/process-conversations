@@ -1,11 +1,25 @@
 #!/usr/bin/env fish
 
+# This script requires the following variables to be set occectly
+set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-2018-08-30/bd.rnnn"
+
+# This script requires the following programs in PATH
+# - whisper-ctranslate2
+# - ffmpeg
+# - ffmpeg-normalize
+# - auto-editor
+# - extract-subtitle-spans
+
+function trim_ext
+    echo "$argv[1]" | rev | cut -d"." -f2- | rev
+end
+
 # Select files that we want to process
-set target_files (find . -name '*.mkv' -not -name '*_ALTERED.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -path './funny/*' | sort)
+set target_files (find . -name '*.mkv' -not -name '*_NORMALIZED.mkv' -not -name '*_ALTERED.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -name '*_ALTERED_SUBED_BAKED.mkv' -not -name '*_IGNORE.mkv' | sort --reverse)
 
 # Filter the files to ignore already processed files.
 for file in $target_files
-    set base_path (dirname "$file")/(basename "$file" .mkv)
+    set base_path (trim_ext "$file")
     set out_file "$base_path"_ALTERED_SUBED.mkv
     if  [ -f "$out_file" ]
 	# echo "For this file there is already a subed file: $file"
@@ -21,38 +35,61 @@ echo "Target Files:"
 for f in $target_files
     echo "$f"
 end
-read -p 'echo Pess enter to continue.'
+
+if [ "$argv[1]" != '-y' ]
+    read -p 'echo Pess enter to continue.'
+end
 
 # Process each file
 for file in $target_files
     echo "Processing: $file"
-    set base_path (dirname "$file")/(basename "$file" .mkv)
-    set cut_file "$base_path"_ALTERED.mkv
-    set transcription_dir "$base_path"_SUBS
-    set out_file "$base_path"_ALTERED_SUBED.mkv
-    set normalized_file "$base_path"_NORMALIZED.mkv
+    set base_dir (dirname "$file")
+    set base_name (basename "$file" .mkv)
+    set base_path "$base_dir"/"$base_name"
+    set tmp_dir "$base_dir"/TMP
+    set normalized_file "$tmp_dir"/"$base_name"_NORMALIZED.mkv
+    set denoised_file "$tmp_dir"/"$base_name"_DENOISED.mkv
+    set cut_file "$tmp_dir"/"$base_name"_ALTERED.mkv
+    set out_file "$tmp_dir"/"$base_name"_ALTERED_SUBED.mkv
+    set subs_dir "$tmp_dir"/SUBS
+    set vf_baked_file (trim_ext "$out_file")_BAKED.mkv
 
-    echo "Normalizing Audio"
-    if [ ! -f "$normalized_file" ]
-        ffmpeg-normalize -o "$normalized_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress --print-stats "$file" || exit 1
-    else
-        echo "For this file there is already a normalized file. I will use that."
-    end
+    mkdir "$tmp_dir" || exit 1
 
-    echo "Removing Silence"
-    if [ ! -f "$cut_file" ]
-        auto-editor --silent-speed 10 --video-bitrate unset --no-open "$normalized_file" --output "$cut_file" || exit 1
-    else
-        echo "For this file there is already a cut file. I will use that."
-    end
+    echo -e "\nNormalizing Audio"
+    ffmpeg-normalize -o "$normalized_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress "$file" || exit 1
+    
+    # Generating Transcript to use transcription timestamps for cutting.
+    echo -e "\nCalculating speech timestamps"
+    whisper-ctranslate2 --model large-v2 --word_timestamps true --output_dir "$subs_dir" --output_format json "$normalized_file" || exit 1
+    set transcription_path_1 "$subs_dir"/(basename "$normalized_file" .mkv).json
 
-    echo "Generating Transcript"
-    whisper-ctranslate2 --model large-v2 --word_timestamps true --highlight_words true --output_dir "$transcription_dir" "$cut_file" || exit 1
-    set transcription_path "$transcription_dir"/(basename "$cut_file" .mkv).srt
-    ffmpeg -y -i "$cut_file" -i "$transcription_path" -c copy -c:s copy "$out_file"
+    # Filter out noise
+    echo -e "\nFilter audio streamout audio noise"
+    ffmpeg -i "$normalized_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$denoised_file"
+
+    # Cut the video
+    echo -e "\nCutting video File"
+    begin
+        extract-subtitle-spans "$transcription_path_1" | xargs auto-editor "$denoised_file" --silent-speed 6 --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud
+    end || exit 1
+
+    # Generate the transcript for the final file
+    echo -e "\nGenerating Transcript"
+    whisper-ctranslate2 --model large-v2 --word_timestamps true --highlight_words true --output_dir "$subs_dir" --output_format vtt "$cut_file" || exit 1
+    set transcription_path_2 "$subs_dir"/(basename "$cut_file" .mkv).vtt
+
+    # Bake the transcription into a subtitle stream of the video file
+    ffmpeg -y -i "$cut_file" -i "$transcription_path_2" -c copy -c:s copy "$out_file"
+
+    # For youtube uploading, generate a separate video file that has the subtitles baked into the video and an srt for the youtube transcription box.
+    ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file"
+
+    echo -e "\nCopying final files"
+    mv "$out_file" "$base_dir"/"$basename"
+    mv "$transcription_path_2" (trim_ext "$out_file").vtt
+    mv "$vf_baked_file" "$base_dir"
 
     # Cleanup
-    rm "$cut_file"
-    rm -r "$transcription_dir"
-    rm "$normalized_file"
+    rm -r "$tmp_dir"
 end
