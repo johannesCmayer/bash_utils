@@ -1,0 +1,18 @@
+#!/usr/bin/env fish
+
+# This script lists all media files in the current directory together with their durations. It does not list files for which mediainfo can't determine a duration.
+
+if [ -z "$argv" ]
+    set files (find . -maxdepth 1 -type f) 
+else
+    set files $argv
+end
+
+for f in $files
+    set a (mediainfo --Inform='General;%Duration/String3%' "$f" | sed 's/\\\n//')
+    if [ -z "$a" ]
+        continue
+    end
+    echo -n "$a"#
+    echo "$f"
+end | column -t -s"#"
