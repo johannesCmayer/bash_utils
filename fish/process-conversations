@@ -1,26 +1,36 @@
 #!/usr/bin/env fish
 
-# This script requires the following variables to be set occectly
+# This script normalizes, noise supresses, cuts silence, and transcribes, a video.
+#
+# The script searches for video files to process from the current working directory recursively, and ignores
+# already processed files.
+#
+# Cutting here means speed up a section of video if it is below a volume threshold, and there are no subtitles.
+# The transcriptions are put into a transcription stream in the video file. Additionally a video file will be
+# Generated which has the subtitles baked into the video.
+
+# This script requires the following variables to be set correctly:
+# The RNN noise removal model file. Get it from: https://github.com/GregorR/rnnoise-models.git OR https://github.com/richardpl/arnndn-models
 set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-2018-08-30/bd.rnnn"
 
-# This script requires the following programs in PATH
-# - whisper-ctranslate2
+# This script requires the following programs in PATH (in addition it requires fish obviously)
+# - whisper-ctranslate2, note that the large-v2 model takes less than 4GB VRAM irrc, if you use int8 quantization (or something similar)
 # - ffmpeg
 # - ffmpeg-normalize
 # - auto-editor
-# - extract-subtitle-spans
+# - extract-subtitle-spans, this script is located in this repo
 
 function trim_ext
     echo "$argv[1]" | rev | cut -d"." -f2- | rev
 end
 
 # Select files that we want to process
-set target_files (find . -name '*.mkv' -not -name '*_NORMALIZED.mkv' -not -name '*_ALTERED.mkv' -not -name '*_ALTERED_SUBED.mkv' -not -name '*_ALTERED_SUBED_BAKED.mkv' -not -name '*_IGNORE.mkv' | sort --reverse)
+set target_files (find . -name '*.mkv' -not -name '*_FIN.mkv' -not -name '*_FIN_BAKED.mkv' -not -path '*/TMP/*' | sort --reverse)
 
 # Filter the files to ignore already processed files.
 for file in $target_files
     set base_path (trim_ext "$file")
-    set out_file "$base_path"_ALTERED_SUBED.mkv
+    set out_file "$base_path"_FIN.mkv
     if  [ -f "$out_file" ]
 	# echo "For this file there is already a subed file: $file"
         continue
@@ -66,7 +76,7 @@ for file in $target_files
 
     # Filter out noise
     echo -e "\nFilter audio streamout audio noise"
-    ffmpeg -i "$normalized_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$denoised_file"
+    ffmpeg -i "$normalized_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$denoised_file" || exit 1
 
     # Cut the video
     echo -e "\nCutting video File"
@@ -80,16 +90,17 @@ for file in $target_files
     set transcription_path_2 "$subs_dir"/(basename "$cut_file" .mkv).vtt
 
     # Bake the transcription into a subtitle stream of the video file
-    ffmpeg -y -i "$cut_file" -i "$transcription_path_2" -c copy -c:s copy "$out_file"
+    ffmpeg -y -i "$cut_file" -i "$transcription_path_2" -c copy -c:s copy "$out_file" || exit 1
 
     # For youtube uploading, generate a separate video file that has the subtitles baked into the video and an srt for the youtube transcription box.
-    ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file"
+    ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file" || exit 1
 
     echo -e "\nCopying final files"
-    mv "$out_file" "$base_dir"/"$basename"
-    mv "$transcription_path_2" (trim_ext "$out_file").vtt
-    mv "$vf_baked_file" "$base_dir"
+    set final_file_stem "$base_dir"/"$base_name"_FIN
+    mv "$out_file" "$final_file_stem".mkv || exit 1
+    mv "$transcription_path_2" "$final_file_stem".vtt || exit 1
+    mv "$vf_baked_file" "$final_file_stem"_BAKED.mkv || exit 1
 
     # Cleanup
-    rm -r "$tmp_dir"
+    rm -r "$tmp_dir" || exit 1
 end
