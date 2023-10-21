@@ -2,12 +2,17 @@
 
 # This script normalizes, noise supresses, cuts silence, and transcribes, a video.
 #
+# As always it is recommended to make backups of important files before using this script.
+#
 # The script searches for video files to process from the current working directory recursively, and ignores
 # already processed files.
 #
 # Cutting here means speed up a section of video if it is below a volume threshold, and there are no subtitles.
 # The transcriptions are put into a transcription stream in the video file. Additionally a video file will be
 # Generated which has the subtitles baked into the video.
+#
+# Note that no relative path of a file to be processed is allowed to contain a single quote otherwise the 
+# subtitle baking will fail, and the script will exit.
 
 # This script requires the following variables to be set correctly:
 # The RNN noise removal model file. Get it from: https://github.com/GregorR/rnnoise-models.git OR https://github.com/richardpl/arnndn-models
@@ -18,7 +23,43 @@ set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-201
 # - ffmpeg
 # - ffmpeg-normalize
 # - auto-editor
-# - extract-subtitle-spans, this script is located in this repo
+# - get-speech-timestamps, this script is located in this repo
+
+argparse 'h/help' 'y/yes' 'silent_speed=' 'youtube_prep' 'cut' 'device_index' 'compute_type' -- $argv || exit 1
+
+function help
+    set name (basename (status filename))
+    echo "--help -h             Print this help."
+    echo "--yes  -y             Don't prompt for confirmation."
+    echo "--silent_speed FLOAT  How fast to play silent parts [defalut: 6]"
+    echo "--youtube_prep        Prepare a baked subtitle file, and a .vtt"
+    echo "                      transcript without highlighting."
+    echo "--cut                 Cut out the silent parts instead of speeding"
+    echo "                      them up."
+    echo "--device_index        The GPU device index that whisper should"
+    echo "                      use. [default: 0]"
+    echo "--device_index        The compute type whisper should use. [default: auto]"
+    exit 0
+end
+
+# Setting defaults
+if [ -z "$_flag_silent_speed" ]
+    set _flag_silent_speed 6
+end
+if [ -z "$_flag_compute_type" ]
+    set _flag_compute_type "auto"
+end
+if [ -z "$_flag_device_index" ]
+    set _flag_device_index 0
+end
+
+# Further argument handeling
+if [ -n "$_flag_cut" ]
+    set _flag_silent_speed 0
+end
+if [ -n "$_flag_help" ]
+    help
+end
 
 function trim_ext
     echo "$argv[1]" | rev | cut -d"." -f2- | rev
@@ -46,7 +87,7 @@ for f in $target_files
     echo "$f"
 end
 
-if [ "$argv[1]" != '-y' ]
+if [ -z "$_flag_yes" ]
     read -p 'echo Pess enter to continue.'
 end
 
@@ -62,6 +103,7 @@ for file in $target_files
     set cut_file "$tmp_dir"/"$base_name"_ALTERED.mkv
     set out_file "$tmp_dir"/"$base_name"_ALTERED_SUBED.mkv
     set subs_dir "$tmp_dir"/SUBS
+    set subs_dir_2 "$tmp_dir"/SUBS_2
     set vf_baked_file (trim_ext "$out_file")_BAKED.mkv
 
     mkdir "$tmp_dir" || exit 1
@@ -69,37 +111,35 @@ for file in $target_files
     echo -e "\nNormalizing Audio"
     ffmpeg-normalize -o "$normalized_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress "$file" || exit 1
     
-    # Generating Transcript to use transcription timestamps for cutting.
-    echo -e "\nCalculating speech timestamps"
-    whisper-ctranslate2 --model large-v2 --word_timestamps true --output_dir "$subs_dir" --output_format json "$normalized_file" || exit 1
-    set transcription_path_1 "$subs_dir"/(basename "$normalized_file" .mkv).json
-
-    # Filter out noise
     echo -e "\nFilter audio streamout audio noise"
     ffmpeg -i "$normalized_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$denoised_file" || exit 1
 
-    # Cut the video
     echo -e "\nCutting video File"
     begin
-        extract-subtitle-spans "$transcription_path_1" | xargs auto-editor "$denoised_file" --silent-speed 6 --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud
+        get-speech-timestamps "$denoised_file" | xargs auto-editor --margin 0,0.1s "$denoised_file" --silent_speed "$_flag_silent_speed" --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud
     end || exit 1
 
-    # Generate the transcript for the final file
-    echo -e "\nGenerating Transcript"
-    whisper-ctranslate2 --model large-v2 --word_timestamps true --highlight_words true --output_dir "$subs_dir" --output_format vtt "$cut_file" || exit 1
+    echo -e "\nGenerate transcript"
+    whisper-ctranslate2 --model large-v2 --device_index "$_flag_device_index" --compute_type "$_flag_compute_type" --word_timestamps true --highlight_words true --output_dir "$subs_dir" --output_format vtt "$cut_file" || exit 1
     set transcription_path_2 "$subs_dir"/(basename "$cut_file" .mkv).vtt
 
-    # Bake the transcription into a subtitle stream of the video file
+    echo -e "\nBakeing the transcription into a subtitle stream of the video file"
     ffmpeg -y -i "$cut_file" -i "$transcription_path_2" -c copy -c:s copy "$out_file" || exit 1
 
     # For youtube uploading, generate a separate video file that has the subtitles baked into the video and an srt for the youtube transcription box.
-    ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file" || exit 1
+    if [ -n "$_flag_youtube_prep" ]
+        ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file" || exit 1
+        whisper-ctranslate2 --model large-v2 --device_index "$_flag_device_index" --compute_type "$_flag_compute_type" --word_timestamps true --output_dir "$subs_dir_2" --output_format vtt "$cut_file" || exit 1
+        set transcription_path_3 "$subs_dir_2"/(basename "$cut_file" .mkv).vtt
+    end
 
     echo -e "\nCopying final files"
     set final_file_stem "$base_dir"/"$base_name"_FIN
     mv "$out_file" "$final_file_stem".mkv || exit 1
-    mv "$transcription_path_2" "$final_file_stem".vtt || exit 1
-    mv "$vf_baked_file" "$final_file_stem"_BAKED.mkv || exit 1
+    if [ -n "$_flag_youtube_prep" ]
+        mv "$transcription_path_3" "$final_file_stem".vtt || exit 1
+        mv "$vf_baked_file" "$final_file_stem"_BAKED.mkv || exit 1
+    end
 
     # Cleanup
     rm -r "$tmp_dir" || exit 1
