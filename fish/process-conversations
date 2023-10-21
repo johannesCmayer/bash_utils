@@ -25,7 +25,7 @@ set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-201
 # - auto-editor
 # - get-speech-timestamps, this script is located in this repo
 
-argparse 'h/help' 'y/yes' 'silent_speed=' 'youtube_prep' 'cut' 'device_index' 'compute_type' -- $argv || exit 1
+argparse 'h/help' 'y/yes' 'silent_speed=' 'youtube_prep' 'cut' 'device_index=' 'compute_type=' -- $argv || exit 1
 
 function help
     set name (basename (status filename))
@@ -38,7 +38,7 @@ function help
     echo "                      them up."
     echo "--device_index        The GPU device index that whisper should"
     echo "                      use. [default: 0]"
-    echo "--device_index        The compute type whisper should use. [default: auto]"
+    echo "--compute_type        The compute type whisper should use. [default: auto]"
     exit 0
 end
 
@@ -62,7 +62,12 @@ if [ -n "$_flag_help" ]
 end
 
 function trim_ext
-    echo "$argv[1]" | rev | cut -d"." -f2- | rev
+    argparse 't/trim_path' -- $argv
+    if [ -n "$_flag_trim_path" ]
+        trim_ext (basename "$argv[1]")
+    else
+        echo "$argv[1]" | rev | cut -d"." -f2- | rev
+    end
 end
 
 # Select files that we want to process
