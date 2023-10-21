@@ -8,6 +8,8 @@ else
     set files $argv
 end
 
+set files (printf "%s\n" $files | sort)
+
 for f in $files
     set a (mediainfo --Inform='General;%Duration/String3%' "$f" | sed 's/\\\n//')
     if [ -z "$a" ]
