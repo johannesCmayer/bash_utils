@@ -25,6 +25,7 @@ set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-201
 # - auto-editor
 # - vad, this script is located in this repo
 
+# Handeling arguments
 argparse 'h/help' 'y/yes' 'silent_speed=' 'youtube_prep' 'cut' 'device_index=' 'compute_type=' 'keep_intermediate' 'threshold=' -- $argv || exit 1
 
 set SILENT_SPEED_DEFAULT 6
@@ -52,7 +53,7 @@ function help
     exit 0
 end
 
-# Setting defaults
+## Setting defaults
 if [ -z "$_flag_silent_speed" ]
     set _flag_silent_speed "$SILENT_SPEED_DEFAULT"
 end
@@ -66,7 +67,7 @@ if [ -z "$_flag_threshold" ]
     set _flag_threshold "$THRESHOLD_DEFAULT"
 end
 
-# Further argument handeling
+## Further argument handeling
 if [ -n "$_flag_cut" ]
     set _flag_silent_speed 0
 end
@@ -161,7 +162,7 @@ for file in $target_files
 
     echo -e "\nCutting video File"
     begin
-        vad timestamps "$denoised_file" --threshold "$_flag_threshold" | xargs auto-editor --margin 0.2s,0.2s "$denoised_file" --silent_speed "$_flag_silent_speed" --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud
+        auto-editor --margin 0.2s,0.2s "$denoised_file" --silent_speed "$_flag_silent_speed" --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud (vad timestamps "$denoised_file" --threshold "$_flag_threshold" | string split -n " ")
     end || exit 1
 
     echo -e "\nGenerate transcript"
