@@ -5,10 +5,21 @@ set DEFAULT_CAMERA "/dev/video2"
 
 argparse 'h/help' 'f/file=' 'c/camera=' -- $argv
 
-if not set -q "$_flag_file"
+function help
+    echo '-h --help        Show this message.' 
+    echo '-f --file FILE   The background file to play.' 
+    echo '-c --camera FILE The camera device file, to put into the background.'
+end
+
+if set -q _flag_help
+    help
+    exit 0
+end
+
+if not set -q _flag_file
     set _flag_file "$DEFAULT_FILE"
 end
-if not set -q "$_flag_camera"
+if not set -q _flag_camera
     set _flag_camera "$DEFAULT_CAMERA"
 end
 
