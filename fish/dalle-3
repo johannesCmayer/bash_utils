@@ -1,0 +1,16 @@
+#!/usr/bin/fish
+
+argparse 'p/prompt=' -- $argv
+
+set response (curl https://api.openai.com/v1/images/generations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d "{
+    \"model\": \"dall-e-3\",
+    \"prompt\": \"$_flag_prompt\",
+    \"n\": 1,
+    \"size\": \"1024x1792\",
+    \"quality\": \"hd\",
+    \"style\": \"vivid\"
+  }")
+echo $response | jq .data[0].url | xargs wget

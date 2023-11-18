@@ -23,5 +23,5 @@ if not set -q _flag_camera
     set _flag_camera "$DEFAULT_CAMERA"
 end
 
-mpv --really-quiet "$_flag_file" --external-file="$_flag_camera" --lavfi-complex="[vid2] scale=1920x1080,crop=1080:1080,pad=iw+4:ih+4:2:2:color=black@0,perspective=661:400:685:322:709:573:720:453:sense=1,limiter=10:200 [vid3]; [vid1][vid3] overlay [vo]" &
+mpv --really-quiet --loop "$_flag_file" --external-file="$_flag_camera" --lavfi-complex="[vid2] scale=1920x1080,crop=1080:1080,pad=iw+4:ih+4:2:2:color=black@0,perspective=661:400:685:322:709:573:720:453:sense=1,limiter=10:200 [vid3]; [vid1][vid3] overlay [vo]" &
 disown

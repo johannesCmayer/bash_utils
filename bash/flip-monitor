@@ -1,0 +1,12 @@
+#!/bin/sh
+
+XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+state_file="$XDG_STATE_HOME"/filp_monitor_state
+
+if [ -f "$state_file" ]; then
+    xrandr --output HDMI-0 --reflect normal
+    rm "$state_file"
+else
+    xrandr --output HDMI-0 --reflect x
+    touch "$state_file"
+fi
