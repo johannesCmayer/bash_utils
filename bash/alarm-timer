@@ -60,6 +60,10 @@ do
       ;;
     --im) imessage=$2; shift
       ;;
+    -S|--silent) message=""; imessage=""
+      ;;
+    -H|--hide-timer) hide_timer=true
+      ;;
     -s|--seconds) seconds=$2; shift
       ;;
     -m|--minutes) minutes=$2; shift
@@ -89,7 +93,7 @@ if [ "$seconds" == 0 ] && [ "$minutes" == 0 ] && [ "$hours" == 0 ]; then
   exit 1
 fi
 
-if which gsay; then
+if which gsay > /dev/null; then
   function speak_cmd {
     "gsay" $1
   }
@@ -122,15 +126,17 @@ while true; do
   sec_remaining=sec
   while true; do
       sec_remaining="$(($sec_remaining-1))"
-      echo -ne "\r\033[K"$text$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
+      if [ ! "$hide_timer" ]; then
+          echo -ne "\r\033[K"$text$((sec_remaining / (60 * 60)))h $(((sec_remaining / 60) % 60))m $((sec_remaining % 60))s
+      fi
       [[ "$sec_remaining" -le 0 ]] && break
       if $warn; then
         for t in 30 60 120 240 600 900 1800; do
           if [ t = 30 -o t = 60 ]; then
-            espeak "$t seconds remaining"
+            speak_cmd "$t seconds remaining"
             break
           fi
-          [[ "$sec_remaining" == $t ]] && espeak "$((t / 60)) minutes remaining"
+          [[ "$sec_remaining" == $t ]] && speak_cmd "$((t / 60)) minutes remaining"
         done
       fi
       ans=""
@@ -139,6 +145,7 @@ while true; do
         while [ ! -z $(read -n1 -s ans) ]; do
           :
         done
+        echo -ne "\r\033[K"
       fi
   done
 

@@ -1,0 +1,34 @@
+#!/usr/bin/env fish
+
+function get-window-description
+    xdotool getactivewindow getwindowname | \
+        sed 's/- main - Obsidian.*$/obsidian/' | \
+        sed 's/Mozilla Firefox/Firefox/' | \
+        sed 's/tmux ~//'
+end
+
+function watch
+    argparse 't/time=' -- $argv
+    while true
+        sleep "$_flag_time"
+        set window (get-window-description)
+        if [ -n "$window" ]
+            gsay "Is $window good?"
+        else
+            echo "Empty title (or filtered)"
+        end
+    end
+end
+
+argparse 'n/name' 't/time=' -- $argv
+
+if [ -z "$_flag_time" ]
+    set -g _flag_time "3m"
+end
+
+if [ -n "$_flag_name" ]
+    sleep 1
+    get-window-description
+else
+    watch --time "$_flag_time"
+end
