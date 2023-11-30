@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+import datetime
+import random
+import typer
+
+def main(probability:float=0.01, dont_seed_with_day:bool=False):
+    if not dont_seed_with_day:
+        date = datetime.datetime.now()
+        date2 = datetime.datetime(year=date.year, month=date.month, day=date.day)
+        random.seed(int(date2.timestamp()))
+
+    print(random.random() < probability)
+
+if __name__ == "__main__":
+    typer.run(main)
