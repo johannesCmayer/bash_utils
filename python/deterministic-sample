@@ -5,6 +5,8 @@ import random
 import typer
 
 def main(probability:float=0.01, dont_seed_with_day:bool=False):
+    """Randomly sample, after seeding with the current date (without time).
+    """
     if not dont_seed_with_day:
         date = datetime.datetime.now()
         date2 = datetime.datetime(year=date.year, month=date.month, day=date.day)
