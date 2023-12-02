@@ -49,7 +49,7 @@ function help
     echo "                        use. [default: $DEVICE_INDEX_DEFAULT]"
     echo "  --compute_type        The compute type whisper should use. [default: $COMPUTE_TYPE_DEFAULT]"
     echo "  --keep_intermediate   Don't delete the TMP folder (useful for debugging)."
-    echo "  --theshold            The threshold for the VAD probability to count as speech. [default: $THRESHOLD_DEFAULT]"
+    echo "  --threshold            The threshold for the VAD probability to count as speech. [default: $THRESHOLD_DEFAULT]"
     exit 0
 end
 
