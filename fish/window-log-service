@@ -1,0 +1,11 @@
+#!/usr/bin/env fish
+
+set prev ""
+while true
+    set name (xdotool getactivewindow getwindowname)
+    if not [ "$name" = "$prev" ]
+        echo (date -Is)", $name" | tee -a ~/.window_name_history
+        set prev "$name"
+    end
+    sleep 1
+end

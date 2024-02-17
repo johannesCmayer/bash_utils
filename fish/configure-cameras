@@ -1,0 +1,8 @@
+#!/usr/bin/env fish
+
+for device in /dev/video*
+    echo "Attempting to configure $device"
+    v4l2-ctl -d "$device" --set-ctrl=zoom_absolute=0
+    v4l2-ctl -d "$device" --set-ctrl=focus_automatic_continuous=0
+    v4l2-ctl -d "$device" --set-ctrl=focus_absolute=0
+end

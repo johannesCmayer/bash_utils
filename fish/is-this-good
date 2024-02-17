@@ -1,10 +1,7 @@
 #!/usr/bin/env fish
 
 function get-window-description
-    xdotool getactivewindow getwindowname | \
-        sed 's/- main - Obsidian.*$/obsidian/' | \
-        sed 's/Mozilla Firefox/Firefox/' | \
-        sed 's/tmux ~//'
+    xdotool getactivewindow getwindowname | sed 's/- main - Obsidian.*$/obsidian/' | sed 's/Mozilla Firefox/Firefox/' | sed 's/tmux ~//'
 end
 
 function watch
@@ -20,10 +17,10 @@ function watch
     end
 end
 
-argparse 'n/name' 't/time=' -- $argv
+argparse n/name 't/time=' -- $argv
 
 if [ -z "$_flag_time" ]
-    set -g _flag_time "3m"
+    set -g _flag_time 3m
 end
 
 if [ -n "$_flag_name" ]
