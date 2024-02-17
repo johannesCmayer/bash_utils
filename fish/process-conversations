@@ -25,14 +25,6 @@ set noise_filter_model_path "/home/johannes/rnnoise-models/beguiling-drafter-201
 # - auto-editor
 # - vad, this script is located in this repo
 
-# Handeling arguments
-argparse 'h/help' 'y/yes' 'silent_speed=' 'youtube_prep' 'cut' 'device_index=' 'compute_type=' 'keep_intermediate' 'threshold=' -- $argv || exit 1
-
-set SILENT_SPEED_DEFAULT 6
-set THRESHOLD_DEFAULT 0.25
-set COMPUTE_TYPE_DEFAULT auto
-set DEVICE_INDEX_DEFAULT 0
-
 function help
     set name (basename (status filename))
     echo "usage:"
@@ -52,6 +44,19 @@ function help
     echo "  --threshold            The threshold for the VAD probability to count as speech. [default: $THRESHOLD_DEFAULT]"
     exit 0
 end
+
+# Constants
+set NORMALIZE true
+set DENOISE true
+set CUT_SILENCE true
+
+# Handeling arguments
+argparse h/help y/yes 'silent_speed=' youtube_prep cut 'device_index=' 'compute_type=' keep_intermediate 'threshold=' -- $argv || exit 1
+
+set SILENT_SPEED_DEFAULT 18
+set THRESHOLD_DEFAULT 0.40
+set COMPUTE_TYPE_DEFAULT auto
+set DEVICE_INDEX_DEFAULT 0
 
 ## Setting defaults
 if [ -z "$_flag_silent_speed" ]
@@ -76,7 +81,7 @@ if [ -n "$_flag_help" ]
 end
 
 function trim_ext
-    argparse 't/trim_path' -- $argv
+    argparse t/trim_path -- $argv
     if [ -n "$_flag_trim_path" ]
         trim_ext (basename "$argv[1]")
     else
@@ -91,7 +96,7 @@ function find-files-recursively
     for file in $target_files
         set base_path (trim_ext "$file")
         set out_file "$base_path"_FIN.mkv
-        if  [ -f "$out_file" ]
+        if [ -f "$out_file" ]
             # echo "For this file there is already a subed file: $file"
             continue
         end
@@ -103,92 +108,170 @@ function find-files-recursively
     end
 end
 
-# Select files that we want to process
-if [ -n "$argv" ]
-    set target_files $argv
-else
-    echo "Searching for files"
-    set target_files (find-files-recursively)
-end
+function normalize \
+        --description "Given a media file, normalize that media files audio, and return the path to the newly generated file"
+    echo -e "\nNormalizing Audio" >&2
 
-# Validate
-for f in $target_files
-    if ! [ -f $f ]
-        echo "ERROR: this file does not exsist: $f"
-        exit 1
+    argparse 'input_file=' 'tmp_dir=' -- $argv >&2 || return 1
+    if [ -z "$_flag_input_file" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
     end
+
+    set output_file "$_flag_tmp_dir/$(uuid).mkv"
+    ffmpeg-normalize -o "$output_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress "$_flag_input_file" >&2 || return 1
+    echo "$output_file"
 end
 
-# Let user confirm targeted Files
-echo "Target Files:"
-for f in $target_files
-    echo "$f"
+function denoise
+    echo -e "\nFilter audio streamout audio noise" >&2
+
+    argparse 'input_file=' 'tmp_dir=' -- $argv
+    if [ -z "$_flag_input_file" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
+    end
+
+    set output_file "$_flag_tmp_dir/$(uuid).mkv"
+    ffmpeg -i "$_flag_input_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$output_file" >&2 || return 1
+    echo "$output_file"
 end
 
-if [ -z "$_flag_yes" ]
-    read -p 'echo Pess enter to continue.'
+function cut-silence
+    echo -e "\nCutting video File" >&2
+
+    argparse 'input_file=' 'tmp_dir=' -- $argv
+    if [ -z "$_flag_input_file" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
+    end
+
+    set output_file "$_flag_tmp_dir/$(uuid).mkv"
+    auto-editor "$_flag_input_file" --margin 0.2s,0.2s --silent_speed "$_flag_silent_speed" --video-bitrate unset --no-open --output "$output_file" --mark-as-loud (vad timestamps "$_flag_input_file" --threshold "$_flag_threshold" | string split -n " ") >&2
+    echo "$output_file"
 end
 
-# Process each file
-for file in $target_files
-    echo "Processing: $file"
-    set base_dir (dirname "$file")
-    set base_name (basename "$file" .mkv)
-    set base_path "$base_dir"/"$base_name"
-    set tmp_dir "$base_dir"/TMP
-    set normalized_file "$tmp_dir"/"$base_name"_NORMALIZED.mkv
-    set denoised_file "$tmp_dir"/"$base_name"_DENOISED.mkv
-    set cut_file "$tmp_dir"/"$base_name"_ALTERED.mkv
-    set out_file "$tmp_dir"/"$base_name"_ALTERED_SUBED.mkv
-    set subs_dir "$tmp_dir"/SUBS
-    set subs_dir_2 "$tmp_dir"/SUBS_2
-    set vf_baked_file (trim_ext "$out_file")_BAKED.mkv
+function generate-transcript \
+        --description "take in a media file and generate an audio transcription"
+    echo -e "\nGenerate transcript" >&2
 
-    if [ -d "$tmp_dir" ]
-        echo "WARNING already exists: $tmp_dir"
-        if [ -z "$_flag_yes" ]
-            read -p "echo PESS ENTER to DELETE and continue"
+    argparse 'input_file=' 'tmp_dir=' -- $argv
+    if [ -z "$_flag_input_file" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
+    end
+
+    set -l output_file "$_flag_tmp_dir/$(uuid).mkv"
+    set -l output_dir "$_flag_tmp_dir/$(uuid)"
+    whisper-ctranslate2 --model large-v2 --device_index "$_flag_device_index" --compute_type "$_flag_compute_type" --word_timestamps true --highlight_words true --output_dir "$output_dir" --output_format vtt "$_flag_input_file" >&2 || return 1
+    mv "$output_dir"/*.vtt "$output_file" >&2
+    echo "$output_file"
+end
+
+function embed-subtitles \
+        --description "Take a subtitle file and embed it into a video file as a separate track"
+    echo "Embedding Subtitiles" >&2
+
+    argparse 'input_file=' 'transcript=' 'tmp_dir=' -- $argv || return 1
+    if [ -z "$_flag_input_file" -o -z "$_flag_transcript" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
+    end
+
+    echo -e "\nBakeing the transcription into a subtitle stream of the video file" >&2
+    set output_file "$_flag_tmp_dir/$(uuid).mkv"
+    ffmpeg -y -i "$_flag_input_file" -i "$_flag_transcript" -c copy -c:s copy "$output_file" || return 1 >&2
+    echo "$output_file"
+end
+
+function bake-subtitles \
+        --description "Take a subtitle file and bake the subtitles into the video as pixels"
+    echo "Baking Subtitles" >&2
+
+    argparse 'input_file=' 'transcript=' 'tmp_dir=' -- $argv
+    if [ -z "$_flag_input_file" -o -z "$_flag_transcript" -o -z "$_flag_tmp_dir" ]
+        echo "The flags input_file transcript and tmp_dir are required" >&2
+        return 1
+    end
+
+    set output_file "$_flag_tmp_dir/$(uuid).mkv"
+    ffmpeg -i "$_flag_input_file" -vf subtitles="$_flag_transcript" "$output_file" >&2 || return 1
+    echo "$output_file"
+end
+
+function main -V _flag_youtube_prep -V _flag_keep_intermediate -a argv
+    # Select files that we want to process
+    if [ -n "$argv" ]
+        set target_files $argv
+    else
+        echo "Searching for files"
+        set target_files (find-files-recursively)
+    end
+
+    # Validate
+    for f in $target_files
+        if ! [ -f $f ]
+            echo "ERROR: this file does not exsist: $f"
+            return 1
         end
-        rm -r "$tmp_dir"
     end
 
-    mkdir "$tmp_dir" || exit 1
-
-    echo -e "\nNormalizing Audio"
-    ffmpeg-normalize -o "$normalized_file" -f --loudness-range-target 5.0 --dual-mono --true-peak -1 --progress "$file" || exit 1
-    
-    echo -e "\nFilter audio streamout audio noise"
-    ffmpeg -i "$normalized_file" -af "arnndn=m=$noise_filter_model_path" -c:v copy "$denoised_file" || exit 1
-
-    echo -e "\nCutting video File"
-    begin
-        auto-editor --margin 0.2s,0.2s "$denoised_file" --silent_speed "$_flag_silent_speed" --video-bitrate unset --no-open --output "$cut_file" --mark-as-loud (vad timestamps "$denoised_file" --threshold "$_flag_threshold" | string split -n " ")
-    end || exit 1
-
-    echo -e "\nGenerate transcript"
-    whisper-ctranslate2 --model large-v2 --device_index "$_flag_device_index" --compute_type "$_flag_compute_type" --word_timestamps true --highlight_words true --output_dir "$subs_dir" --output_format vtt "$cut_file" || exit 1
-    set transcription_path_2 "$subs_dir"/(basename "$cut_file" .mkv).vtt
-
-    echo -e "\nBakeing the transcription into a subtitle stream of the video file"
-    ffmpeg -y -i "$cut_file" -i "$transcription_path_2" -c copy -c:s copy "$out_file" || exit 1
-
-    # For youtube uploading, generate a separate video file that has the subtitles baked into the video and an srt for the youtube transcription box.
-    if [ -n "$_flag_youtube_prep" ]
-        ffmpeg -i "$out_file" -vf subtitles="$out_file" "$vf_baked_file" || exit 1
-        whisper-ctranslate2 --model large-v2 --device_index "$_flag_device_index" --compute_type "$_flag_compute_type" --word_timestamps true --output_dir "$subs_dir_2" --output_format vtt "$cut_file" || exit 1
-        set transcription_path_3 "$subs_dir_2"/(basename "$cut_file" .mkv).vtt
+    # Let user confirm targeted Files
+    echo "Target Files:"
+    for f in $target_files
+        echo "$f"
     end
 
-    echo -e "\nCopying final files"
-    set final_file_stem "$base_dir"/"$base_name"_FIN
-    mv "$out_file" "$final_file_stem".mkv || exit 1
-    if [ -n "$_flag_youtube_prep" ]
-        mv "$transcription_path_3" "$final_file_stem".vtt || exit 1
-        mv "$vf_baked_file" "$final_file_stem"_BAKED.mkv || exit 1
+    if [ -z "$_flag_yes" ]
+        read -p 'echo Pess enter to continue.'
     end
 
-    # Cleanup
-    if [ -z "$_flag_keep_intermediate" ]
-        rm -r "$tmp_dir" || exit 1
+    # Process each file
+    for file in $target_files
+        set tmp_dir "/tmp/process_conversations/$(uuid)"
+        mkdir -p "$tmp_dir"
+
+        # We will now pass the file through a pipeline of transformations on the video file.
+        set current_file "$file"
+
+        # Convert to mkv. Required for some processing steps
+        set output_file "$tmp_dir/$(uuid).mkv"
+        ffmpeg -i "$current_file" -c copy "$output_file" || return 1
+        set current_file "$output_file"
+
+        echo tmp_dir $tmp_dir >&2
+        if "$NORMALIZE"
+            set current_file (normalize --input_file "$current_file" --tmp_dir "$tmp_dir" || return 1)
+        end
+        
+        if "$DENOISE"
+            set current_file (denoise --input_file "$current_file" --tmp_dir "$tmp_dir" || return 1)
+        end
+
+        if "$CUT_SILENCE"
+            set current_file (cut-silence --input_file "$current_file" --tmp_dir "$tmp_dir" || return 1)
+        end
+
+        set transcript (generate-transcript --input_file "$current_file" --tmp_dir "$tmp_dir" || return 1)
+        # set current_file (embed-subtitles --input_file "$current_file" --transcript "$transcript" --tmp_dir "$tmp_dir" || return 1)
+
+
+        echo -e "\nCopying final files"
+        set ext (path extension "$file")
+        ffmpeg -y -i "$current_file" -c copy (basename "$file" "$ext")_FIN"$ext" || return 1
+        cp "$transcript" (basename "$file" "$ext")_FIN.vtt
+
+        # For youtube uploading, generate a separate video file that has the subtitles baked into the video and an srt for the youtube transcription box.
+        if [ -n "$_flag_youtube_prep" ]
+            set baked_subs_file (bake-subtitles --input_file "$current_file" --transcript "$transcript" --tmp_dir "$tmp_dir" || return 1)
+            ffmpeg -y -i "$baked_subs_file" -c copy (basename "$file" "$ext")_FIN_BAKE"$ext" || return 1
+        end
+
+        # Cleanup
+        if [ -z "$_flag_keep_intermediate" ]
+            rm -r "$tmp_dir" || return 1
+        end
     end
 end
+
+main $argv || return 1
