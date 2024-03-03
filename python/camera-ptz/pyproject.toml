@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "camera-ptz"
+version = "0.1.0"
+description = ""
+authors = ["Johannes C. Mayer <j.c.mayer240@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pygame = "^2.5.2"
+pyjoystick = "^1.2.4"
+pygame-gui = "^0.6.9"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
