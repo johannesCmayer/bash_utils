@@ -37,31 +37,31 @@ TILT_DEFAULT = 0
 ZOOM_DEFAULT = 0
 
 
-def list_devices():
+def list_cameras():
     run(["v4l2-ctl", "--list-devices"])
 
 
-def set_ctrl(device_idx, cmd_string):
+def set_camera_ctrl(device_idx, cmd_string):
     run(["v4l2-ctl", "-d", str(device_idx), "--set-ctrl", cmd_string], check=True)
 
 
-def autofocus(device_idx, autofocus : bool):
+def set_autofocus(device_idx, autofocus : bool):
     value = 1 if autofocus else 0
-    set_ctrl(device_idx, f"focus_automatic_continuous={value}")
+    set_camera_ctrl(device_idx, f"focus_automatic_continuous={value}")
 
 
 def set_focus(device_idx, focus : int):
-    set_ctrl(device_idx, f"focus_absolute={focus}")
+    set_camera_ctrl(device_idx, f"focus_absolute={focus}")
 
 
 def set_exposure(device_idx, exposure_time=250):
-    set_ctrl(device_idx, f"auto_exposure=1")
-    set_ctrl(device_idx, f"exposure_time_absolute={exposure_time}")
+    set_camera_ctrl(device_idx, f"auto_exposure=1")
+    set_camera_ctrl(device_idx, f"exposure_time_absolute={exposure_time}")
 
 
-def camera_set_ptz(device_idx, pan, tilt, zoom):
+def set_ptz(device_idx, pan, tilt, zoom):
     for cmd in [f"zoom_absolute={zoom}", f"tilt_absolute={tilt}", f"pan_absolute={pan}"]:
-        set_ctrl(device_idx, cmd)
+        set_camera_ctrl(device_idx, cmd)
 
 
 def setup_camera_for_whiteboard(device_idx):
@@ -69,26 +69,26 @@ def setup_camera_for_whiteboard(device_idx):
     Setup the camera optimized for whiteboard recording.
     It will be horrible quality when not filming a whiteboard!
     """
-    autofocus(device_idx, False)
+    set_autofocus(device_idx, False)
     set_focus(device_idx, 0)
     set_exposure(device_idx, 250)
 
     # Make the colors pop out more. This is the main thing that ruins
     # image quality.
-    set_ctrl(device_idx, "saturation=215")
+    set_camera_ctrl(device_idx, "saturation=215")
     # Setting the sharpness as high as possible helps making the text readable.
-    set_ctrl(device_idx, "sharpness=255")
+    set_camera_ctrl(device_idx, "sharpness=255")
     # Setting the exposure helps make text more readable. Having brighter lights also helps and means
     # this value can be set lower.
-    set_ctrl(device_idx, "exposure_time_absolute=700")
+    set_camera_ctrl(device_idx, "exposure_time_absolute=700")
 
-    set_ctrl(device_idx, "backlight_compensation=0")
+    set_camera_ctrl(device_idx, "backlight_compensation=0")
 
 
 @app.command()
-def main(device_idx : Optional[int]=None, joystick_name_regex=None):
-    if not device_idx:
-        list_devices()
+def main(camera_device_idx : Optional[int]=None, joystick_name_regex=None):
+    if not camera_device_idx:
+        list_cameras()
         print("Please provide the device index of one of these cameras.")
         exit(0)
 
@@ -101,7 +101,7 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
-    setup_camera_for_whiteboard(device_idx)
+    setup_camera_for_whiteboard(camera_device_idx)
 
     # Setup the starting default values
     pan = PAN_DEFAULT
@@ -121,44 +121,45 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
     while True:
         # Process events
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    done = True  # Flag that we are done so we exit this loop.
+            if event.type == pygame.QUIT:
+                done = True  # Flag that we are done so we exit this loop.
 
-                if event.type == pygame.JOYBUTTONDOWN:
-                    print("Joystick button pressed.")
-                    if event.button == 0:
-                        pan = PAN_DEFAULT
-                        tilt = TILT_DEFAULT
-                        zoom = ZOOM_DEFAULT
-                        if joystick.rumble(0, 0.7, 500):
-                            print(f"Rumble effect played on joystick {event.instance_id}")
-                    if event.button == 1:
-                        force_alt_zoom = True
+            if event.type == pygame.JOYBUTTONDOWN:
+                print("Joystick button pressed.")
+                if event.button == 0:
+                    pan = PAN_DEFAULT
+                    tilt = TILT_DEFAULT
+                    zoom = ZOOM_DEFAULT
+                    if joystick.rumble(0, 0.7, 500):
+                        print(f"Rumble effect played on joystick {event.instance_id}")
+                if event.button == 1:
+                    force_alt_zoom = True
 
-                    if event.button == 3:
-                        force_zoom_out_mode = True
-                        saved_zoom = zoom
+                if event.button == 3:
+                    force_zoom_out_mode = True
+                    saved_zoom = zoom
 
-                if event.type == pygame.JOYBUTTONUP:
-                    if event.button == 3:
-                        force_zoom_out_mode = False
-                        zoom = saved_zoom
+            if event.type == pygame.JOYBUTTONUP:
+                if event.button == 3:
+                    force_zoom_out_mode = False
+                    zoom = saved_zoom
 
-                if event.type == pygame.JOYDEVICEADDED:
-                    # This event will be generated when the program starts for every
-                    # joystick, filling up the list without needing to create them manually.
-                    joy = pygame.joystick.Joystick(event.device_index)
-                    joysticks[joy.get_instance_id()] = joy
-                    print(f"Joystick {joy.get_instance_id()} connencted")
-                    print(f"  Name: {joy.get_name()}")
-                    print(f"  GUID: {joy.get_guid()}")
+            if event.type == pygame.JOYDEVICEADDED:
+                # This event will be generated when the program starts for every
+                # joystick, filling up the list without needing to create them manually.
+                joy = pygame.joystick.Joystick(event.device_index)
+                joysticks[joy.get_instance_id()] = joy
+                print(f"Joystick {joy.get_instance_id()} connencted")
+                print(f"  Name: {joy.get_name()}")
+                print(f"  GUID: {joy.get_guid()}")
 
-                if event.type == pygame.JOYDEVICEREMOVED:
-                    print(f"Joystick {event.instance_id} disconnected")
-                    print(f"  Name: {joysticks[event.instance_id].get_name()}")
-                    print(f"  GUID: {joysticks[event.instance_id].get_guid()}")
-                    del joysticks[event.instance_id]
+            if event.type == pygame.JOYDEVICEREMOVED:
+                print(f"Joystick {event.instance_id} disconnected")
+                print(f"  Name: {joysticks[event.instance_id].get_name()}")
+                print(f"  GUID: {joysticks[event.instance_id].get_guid()}")
+                del joysticks[event.instance_id]
 
+        # Select a joystick as active if no joystick is set as active
         if not active_joystick:
             if joystick_name_regex:
                 selected_joysticks = {k: j for k,j in joysticks.items() if re.search(joystick_name_regex, j.get_name())}
@@ -184,18 +185,21 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
                 print("No matching Joystick found. Waiting for matching joystick to become available.\r", end="")
                 sleep(0.5)
                 continue
-
+        
+        # Validate joystick
         n_axes = joystick.get_numaxes()
         if n_axes < 3:
             print("We need a joystick with at least 3 axis!")
             exit(1)
+
+        # Get Joystick axis
         pan_ax  =  joystick.get_axis(0)
         tilt_ax = -joystick.get_axis(1)
         zoom_ax =  joystick.get_axis(2)
         zoom_ax_alt =  joystick.get_axis(3)
 
+        # Calculate Deadzones
         DEADZONE = 0.1
-     
         if abs(pan_ax) < DEADZONE:
             pan_ax = 0
         if abs(tilt_ax) < DEADZONE:
@@ -203,22 +207,33 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
         if abs(zoom_ax) < DEADZONE:
             zoom_ax = 0
 
-        pan = max(MIN_PAN, min(MAX_PAN,   pan  + pan_ax  * PAN_SPEED))
-        tilt = max(MIN_TILT, min(MAX_TILT,  tilt + tilt_ax * TILT_SPEED))
-
-        zoom = max(MIN_ZOOM, min(MAX_ZOOM,     zoom + zoom_ax * ZOOM_SPEED))
+        # Compute pan tilt and zoom
+        pan += pan_ax * PAN_SPEED
+        tilt += tilt + tilt_ax * TILT_SPEED
+        zoom += zoom + zoom_ax * ZOOM_SPEED
+        
+        # Compute Alt zoom (overwrites previous zoom if active)
         if prev_zoom_ax_alt != zoom_ax_alt or force_alt_zoom:
             zoom = MIN_ZOOM + (MAX_ZOOM - MIN_ZOOM) * (1 + zoom_ax_alt) / 2
             force_alt_zoom = False
+
+        # Calculate zoom for forced zoom_out_mode  (overwrites previous zoom if active)
         if force_zoom_out_mode:
             zoom = MIN_ZOOM
 
+        # Clamp Values
+        pan = max(MIN_PAN, min(MAX_PAN, pan))
+        tilt = max(MIN_TILT, min(MAX_TILT, tilt))
+        zoom = max(MIN_ZOOM, min(MAX_ZOOM, zoom ))
+
         print("Axis:", f"PAN:{pan_ax:.1f}", f"TILT:{tilt_ax:.1f}", f"ZOOM:{zoom_ax:.1f}", f"ZOOM_ABS:{zoom_ax_alt:.1f}""    ", "PTZ:", f"{pan:.1f}", f"{tilt:.1f}", f"{zoom:.1f}", end='\r')
-        camera_set_ptz(device_idx, pan, tilt, zoom)
+        set_ptz(camera_device_idx, pan, tilt, zoom)
 
         prev_zoom_ax_alt = zoom_ax_alt
 
         # Throttle the loop to save CPU usage
+        # Note that pan, tilt, and zoom speed depend on this value currently,
+        # so it's bad to change it.
         time.sleep(0.01)
 
 if __name__ == "__main__":
