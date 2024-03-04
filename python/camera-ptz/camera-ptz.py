@@ -24,7 +24,8 @@ MIN_ZOOM = 100
 MAX_ZOOM = 500
 
 # Overwirite the acutal max zoom, because quality degrades signifcantly when
-# going much beyond 300 with Brio
+# going much beyond 300 with Brio. Actually 300 seems to be the max for 4K mode
+# so maybe beyond 300 is all digital zoom.
 MAX_ZOOM = 300
 
 MIN_PAN  = -36000
