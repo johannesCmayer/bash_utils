@@ -8,6 +8,7 @@ import pygame
 import time
 from subprocess import run
 from typing import Optional
+import re
 
 import typer
 
@@ -84,7 +85,7 @@ def setup_camera_for_whiteboard(device_idx):
 
 
 @app.command()
-def main(device_idx : Optional[int]=None):
+def main(device_idx : Optional[int]=None, joystick_name_regex=None):
     if not device_idx:
         list_devices()
         print("Please provide the device index of one of these cameras.")
@@ -110,6 +111,10 @@ def main(device_idx : Optional[int]=None):
     force_alt_zoom = False
     force_zoom_out_mode = False
     saved_zoom = ZOOM_DEFAULT
+
+
+    joysticks = {}
+    active_joystick = None
 
     # Main loop
     while True:
@@ -138,15 +143,34 @@ def main(device_idx : Optional[int]=None):
                         force_zoom_out_mode = False
                         zoom = saved_zoom
 
-                # Handle hotplugging
                 if event.type == pygame.JOYDEVICEADDED:
                     # This event will be generated when the program starts for every
                     # joystick, filling up the list without needing to create them manually.
-                    joystick = pygame.joystick.Joystick(event.device_index)
-                    print(f"New joystick {event.device_index} connected. Using this joystick now.")
+                    joy = pygame.joystick.Joystick(event.device_index)
+                    joysticks[joy.get_instance_id()] = joy
+                    print(f"Joystick {joy.get_instance_id()} connencted")
+                    print(f"  Name: {joy.get_name()}")
+                    print(f"  GUID: {joy.get_guid()}")
 
                 if event.type == pygame.JOYDEVICEREMOVED:
-                    print(f"Joystick {event.instance_id} disconnected, please connect a new joystick.")
+                    print(f"Joystick {event.instance_id} disconnected")
+                    print(f"  Name: {joysticks[event.instance_id].get_name()}")
+                    print(f"  GUID: {joysticks[guidevent.instance_id].get_guid()}")
+                    del joysticks[event.instance_id]
+
+        if not active_joystick:
+            if joystick_name_regex:
+                selected_joysticks = {k: j for k,j in joysticks.items() if re.search(j.get_name(), joystick_name_regex)}
+            else:
+                selected_joysticks = joysticks
+
+            if len(selected_joysticks) > 1:
+                print("Could not select a unique joystick. Please use a regex to select (see help).")
+                for idx, joy in selected_joysticks.items():
+                    print("Index:", idx)
+                    print("  Name:", joy.get_name())
+                    print("  GUID:", joy.get_guid())
+                exit(1)
 
         n_axes = joystick.get_numaxes()
         if n_axes < 3:
@@ -176,7 +200,7 @@ def main(device_idx : Optional[int]=None):
         if force_zoom_out_mode:
             zoom = MIN_ZOOM
 
-        print("Axis:", f"{pan_ax:.1f}", f"{tilt_ax:.1f}", f"{zoom_ax:.1f}", "    ", "PTZ:", f"{pan:.1f}", f"{tilt:.1f}", f"{zoom:.1f}", end='\r')
+        print("Axis:", f"PAN:{pan_ax:.1f}", f"TILT:{tilt_ax:.1f}", f"ZOOM:{zoom_ax:.1f}", f"ZOOM_ABS:{zoom_ax_alt:.1f}""    ", "PTZ:", f"{pan:.1f}", f"{tilt:.1f}", f"{zoom:.1f}", end='\r')
         camera_set_ptz(device_idx, pan, tilt, zoom)
 
         prev_zoom_ax_alt = zoom_ax_alt
