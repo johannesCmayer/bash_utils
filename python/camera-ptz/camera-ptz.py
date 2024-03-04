@@ -9,6 +9,7 @@ import time
 from subprocess import run
 from typing import Optional
 import re
+from time import sleep
 
 import typer
 
@@ -155,13 +156,15 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
                 if event.type == pygame.JOYDEVICEREMOVED:
                     print(f"Joystick {event.instance_id} disconnected")
                     print(f"  Name: {joysticks[event.instance_id].get_name()}")
-                    print(f"  GUID: {joysticks[guidevent.instance_id].get_guid()}")
+                    print(f"  GUID: {joysticks[event.instance_id].get_guid()}")
                     del joysticks[event.instance_id]
 
         if not active_joystick:
             if joystick_name_regex:
-                selected_joysticks = {k: j for k,j in joysticks.items() if re.search(j.get_name(), joystick_name_regex)}
+                selected_joysticks = {k: j for k,j in joysticks.items() if re.search(joystick_name_regex, j.get_name())}
+                print(f'Using Regex to select on name: {joystick_name_regex}')
             else:
+                print('Using All')
                 selected_joysticks = joysticks
 
             if len(selected_joysticks) > 1:
@@ -171,6 +174,16 @@ def main(device_idx : Optional[int]=None, joystick_name_regex=None):
                     print("  Name:", joy.get_name())
                     print("  GUID:", joy.get_guid())
                 exit(1)
+            elif len(selected_joysticks) == 1:
+                active_joystick_idx, active_joystick = list(selected_joysticks.items())[0]
+                print(f"Set Joystick {active_joystick_idx} as active:")
+                print(f"  Name: {active_joystick.get_name()}")
+                print(f"  GUID: {active_joystick.get_guid()}")
+            elif len(selected_joysticks) == 0:
+                print(selected_joysticks)
+                print("No matching Joystick found. Waiting for matching joystick to become available.\r", end="")
+                sleep(0.5)
+                continue
 
         n_axes = joystick.get_numaxes()
         if n_axes < 3:
