@@ -7,6 +7,7 @@ Control camera with a joystick
 import pygame
 import time
 from subprocess import run
+from typing import Optional
 
 import typer
 
@@ -33,24 +34,62 @@ PAN_DEFAULT = 0
 TILT_DEFAULT = 0
 ZOOM_DEFAULT = 0
 
+
+def list_devices():
+    run(["v4l2-ctl", "--list-devices"])
+
+
 def set_ctrl(device_idx, cmd_string):
     run(["v4l2-ctl", "-d", str(device_idx), "--set-ctrl", cmd_string], check=True)
 
-def set_focus(device_idx, focus=0):
-    """Disable automatic focus and set the focus"""
-    set_ctrl(device_idx, "focus_automatic_continuous=0")
+
+def autofocus(device_idx, autofocus : bool):
+    value = 1 if autofocus else 0
+    set_ctrl(device_idx, f"focus_automatic_continuous={value}")
+
+
+def set_focus(device_idx, focus : int):
     set_ctrl(device_idx, f"focus_absolute={focus}")
+
 
 def set_exposure(device_idx, exposure_time=250):
     set_ctrl(device_idx, f"auto_exposure=1")
     set_ctrl(device_idx, f"exposure_time_absolute={exposure_time}")
 
+
 def camera_set_ptz(device_idx, pan, tilt, zoom):
     for cmd in [f"zoom_absolute={zoom}", f"tilt_absolute={tilt}", f"pan_absolute={pan}"]:
         set_ctrl(device_idx, cmd)
 
+
+def setup_camera_for_whiteboard(device_idx):
+    """
+    Setup the camera optimized for whiteboard recording.
+    It will be horrible quality when not filming a whiteboard!
+    """
+    autofocus(device_idx, False)
+    set_focus(device_idx, 0)
+    set_exposure(device_idx, 250)
+
+    # Make the colors pop out more. This is the main thing that ruins
+    # image quality.
+    set_ctrl(device_idx, "saturation=215")
+    # Setting the sharpness as high as possible helps making the text readable.
+    set_ctrl(device_idx, "sharpness=255")
+    # Setting the exposure helps make text more readable. Having brighter lights also helps and means
+    # this value can be set lower.
+    set_ctrl(device_idx, "exposure_time_absolute=700")
+
+    set_ctrl(device_idx, "backlight_compensation=0")
+
+
 @app.command()
-def main(device_index):
+def main(device_idx : Optional[int]=None):
+    if not device_idx:
+        list_devices()
+        print("Please provide the device index of one of these cameras.")
+        exit(0)
+
     pygame.init()
 
     # Initialize the joystick module
@@ -60,8 +99,7 @@ def main(device_index):
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
-    set_focus(device_index)
-    set_exposure(device_index)
+    setup_camera_for_whiteboard(device_idx)
 
     # Setup the starting default values
     pan = PAN_DEFAULT
@@ -139,7 +177,7 @@ def main(device_index):
             zoom = MIN_ZOOM
 
         print("Axis:", f"{pan_ax:.1f}", f"{tilt_ax:.1f}", f"{zoom_ax:.1f}", "    ", "PTZ:", f"{pan:.1f}", f"{tilt:.1f}", f"{zoom:.1f}", end='\r')
-        camera_set_ptz(device_index, pan, tilt, zoom)
+        camera_set_ptz(device_idx, pan, tilt, zoom)
 
         prev_zoom_ax_alt = zoom_ax_alt
 
