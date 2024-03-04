@@ -10,15 +10,16 @@ from subprocess import run
 from typing import Optional
 import re
 from time import sleep
+import math
 
 import typer
 
 app = typer.Typer()
 
 # Hardcoded value for 4K Brio
-PAN_SPEED = 5000
-TILT_SPEED = 5000
-ZOOM_SPEED = 10
+PAN_SPEED = 400000
+TILT_SPEED = 400000
+ZOOM_SPEED = 400
 
 MIN_ZOOM = 100
 MAX_ZOOM = 500
@@ -118,8 +119,13 @@ def main(camera_device_idx : Optional[int]=None, joystick_name_regex=None):
     joysticks = {}
     active_joystick = None
 
+    start_time = time.time()
+
     # Main loop
     while True:
+        delta_time = time.time() - start_time
+        start_time = time.time()
+
         # Process events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -211,9 +217,9 @@ def main(camera_device_idx : Optional[int]=None, joystick_name_regex=None):
             zoom_ax = 0
 
         # Compute pan tilt and zoom
-        pan +=  pan_ax * PAN_SPEED
-        tilt += tilt_ax * TILT_SPEED
-        zoom += zoom_ax * ZOOM_SPEED
+        pan +=  math.copysign(1, pan_ax) *  abs(pan_ax**3) * PAN_SPEED * delta_time
+        tilt += math.copysign(1, tilt_ax) * abs(tilt_ax**3) * TILT_SPEED * delta_time
+        zoom += math.copysign(1, zoom_ax) * abs(zoom_ax**2) * ZOOM_SPEED * delta_time
         
         # Compute Alt zoom (overwrites previous zoom if active)
         if prev_zoom_ax_alt != zoom_ax_alt or force_alt_zoom:
