@@ -125,22 +125,24 @@ def main(camera_device_idx : Optional[int]=None, joystick_name_regex=None):
                 done = True  # Flag that we are done so we exit this loop.
 
             if event.type == pygame.JOYBUTTONDOWN:
-                print("Joystick button pressed.")
                 if event.button == 0:
+                    print("Reseting PTZ")
                     pan = PAN_DEFAULT
                     tilt = TILT_DEFAULT
                     zoom = ZOOM_DEFAULT
-                    if joystick.rumble(0, 0.7, 500):
-                        print(f"Rumble effect played on joystick {event.instance_id}")
+
                 if event.button == 1:
+                    print("Resetting zoom to alt zoom levels.")
                     force_alt_zoom = True
 
                 if event.button == 3:
+                    print("Force zoom out activated.")
                     force_zoom_out_mode = True
                     saved_zoom = zoom
 
             if event.type == pygame.JOYBUTTONUP:
                 if event.button == 3:
+                    print("Force zoom out deactivated.")
                     force_zoom_out_mode = False
                     zoom = saved_zoom
 
@@ -208,9 +210,9 @@ def main(camera_device_idx : Optional[int]=None, joystick_name_regex=None):
             zoom_ax = 0
 
         # Compute pan tilt and zoom
-        pan += pan_ax * PAN_SPEED
-        tilt += tilt + tilt_ax * TILT_SPEED
-        zoom += zoom + zoom_ax * ZOOM_SPEED
+        pan +=  pan_ax * PAN_SPEED
+        tilt += tilt_ax * TILT_SPEED
+        zoom += zoom_ax * ZOOM_SPEED
         
         # Compute Alt zoom (overwrites previous zoom if active)
         if prev_zoom_ax_alt != zoom_ax_alt or force_alt_zoom:
